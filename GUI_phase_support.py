@@ -9,6 +9,8 @@
 #    Oct 02, 2018 03:33:26 PM CEST  platform: Linux
 #    Oct 02, 2018 04:36:15 PM CEST  platform: Linux
 #    Oct 03, 2018 10:46:20 AM CEST  platform: Linux
+#    Oct 03, 2018 02:49:40 PM CEST  platform: Linux
+#    Oct 03, 2018 02:53:50 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -17,6 +19,9 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
+import phase_sim
+from numpy import *
+import codecs
 
 try:
     from Tkinter import *
@@ -35,25 +40,28 @@ def set_Tk_var():
     contEntry1 = StringVar()
     filename=StringVar()
     sys.stdout.flush()
-    global cont_Lab
-    cont_Lab = StringVar()
+    global cont_delim
+    cont_delim = StringVar()
+    global cont_chunck
+    cont_chunck = StringVar()
+    
     
 
+
+def LoadFile_pressed(e):
+    del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
+    t,c1,c2,c3,c4=phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded)
+    ax1.clear()
+    ax1.plot(t,c1)
+    canvas1.draw()
+    
 def Search_pressed(e):
     global filename
     name=filedialog.askopenfilename(initialdir=".")
     filename.set(name)
     w.Text1.insert(END,filename.get())
-    #global w, contEntry1
-    #ins=contEntry1.get()
-    #print("added by hand")
     sys.stdout.flush()
-
-def Run_file_pressed(e):
-    global filename
-    print(filename.get())
     
-
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
@@ -63,19 +71,18 @@ def init(top, gui, *args, **kwargs):
     plotingui()
   
 def plotingui():
-    global w,a,canvas1
+    global w,ax1,canvas1
     f1=w.Frame1
     f= Figure(figsize=(6, 4), dpi=100)
-    a= f.add_subplot(111)
+    ax1= f.add_subplot(111)
     canvas1 = FCTkAgg(f, f1)
     toolbar1 = NavigationToolbar2Tk(canvas1, f1 )
     toolbar1.pack()
     canvas1.get_tk_widget().pack()
     
-def LoadSim_pressed(p1):
-    global a,canvas1
-    a.plot([1,2,3,4,4,3])
-    canvas1.draw()
+def LoadSim_pressed(e):
+    print("pressed load")
+ 
 
     
 def destroy_window():
@@ -89,6 +96,16 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
+
+
+
+
 
 
 
