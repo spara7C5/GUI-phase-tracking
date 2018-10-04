@@ -13,6 +13,8 @@
 #    Oct 03, 2018 02:53:50 PM CEST  platform: Linux
 #    Oct 04, 2018 11:28:39 AM CEST  platform: Linux
 #    Oct 04, 2018 11:59:27 AM CEST  platform: Linux
+#    Oct 04, 2018 02:01:37 PM CEST  platform: Linux
+#    Oct 04, 2018 03:55:43 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -46,11 +48,14 @@ def set_Tk_var():
     cont_delim = StringVar()
     global cont_chunck
     cont_chunck = StringVar()
-    
-    
-
-
-
+    global freq_cut
+    freq_cut = StringVar()
+    global freq_samp
+    freq_samp = StringVar()
+    global applyfilt
+    applyfilt = IntVar(0)
+    global upload_check
+    upload_check = StringVar()
 
 def LoadSim_pressed(p1):
     print('GUI_phase_support.LoadSim_pressed')
@@ -58,17 +63,38 @@ def LoadSim_pressed(p1):
     sys.stdout.flush()
 
 def LoadFile_pressed(e):
-    global w,loaddata
+    global w,loaddata,upload_check
+    upload_check.set("Waiting...")
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
-    loaddata=phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded)
+    loaddata=list(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+    upload_check.set("Done!")
+    
 
     
 def Refresh_pressed(p1):
-    plotrefresh(pl4[0],pl4[1],loaddata[1])
-    plotrefresh(pl5[0],pl5[1],loaddata[2])
-    plotrefresh(pl6[0],pl6[1],loaddata[3])
-    plotrefresh(pl7[0],pl7[1],loaddata[4])   
+    global loaddata
+    
+    if applyfilt.get():
+        try:
+            fcc=float(freq_cut.get()) 
+        except ValueError:
+            fcc=1000;fss=2500000
+        try:
+            fss=float(freq_samp.get())
+        except ValueError:
+            fcc=1000;fss=2500000
+        print(float(freq_cut.get()))
+        loaddatafil=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
+        plotrefresh(pl4[0],pl4[1],loaddatafil[0])
+        plotrefresh(pl5[0],pl5[1],loaddatafil[1])
+        plotrefresh(pl6[0],pl6[1],loaddatafil[2])
+        plotrefresh(pl7[0],pl7[1],loaddatafil[3]) 
+    else:  
+        plotrefresh(pl4[0],pl4[1],loaddata[1])
+        plotrefresh(pl5[0],pl5[1],loaddata[2])
+        plotrefresh(pl6[0],pl6[1],loaddata[3])
+        plotrefresh(pl7[0],pl7[1],loaddata[4])   
     
     
 def Search_pressed(e):
@@ -85,6 +111,7 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
+    pl1=plotinit(w.Frame1)
     pl4=plotinit(w.Frame4)
     pl5=plotinit(w.Frame5)
     pl6=plotinit(w.Frame6)
@@ -117,6 +144,16 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
+
+
+
+
 
 
 

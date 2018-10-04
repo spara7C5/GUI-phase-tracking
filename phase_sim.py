@@ -21,6 +21,15 @@ def loader(name,num,delim):
 	t,ch1,ch2,ch3,ch4=genfromtxt(name,max_rows=num,delimiter=delim,unpack='True')
 	return t,ch1,ch2,ch3,ch4
 
+
+def lowfilter(data,fc=1*10**6,fs=2.5*10**6):
+	b,a=signal.butter(5, fc/(fs/2), 'low')	
+	out1=signal.filtfilt(b, a, data[0])
+	out2=signal.filtfilt(b, a, data[1])
+	out3=signal.filtfilt(b, a, data[2])
+	out4=signal.filtfilt(b, a, data[3])
+	return out1,out2,out3,out4
+
 def tracker():
 	direct_plot_mode=0
 	phase_plot_mode=0
@@ -47,13 +56,7 @@ def tracker():
 
 	###----IIR filtering------###############
 
-	if filteractive:
-		fc=1000#fs/50.#cutoff frequency
-		b,a=signal.butter(5, fc/(fs/2), 'low')
-		rex=signal.filtfilt(b, a, rex)
-		imx=signal.filtfilt(b, a, imx)
-		rey=signal.filtfilt(b, a, rey)
-		imy=signal.filtfilt(b, a, imy)
+
 
 	#PSD.plotpsd(rex,fs)
 	show()
