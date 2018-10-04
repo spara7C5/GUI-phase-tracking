@@ -15,6 +15,7 @@
 #    Oct 04, 2018 11:59:27 AM CEST  platform: Linux
 #    Oct 04, 2018 02:01:37 PM CEST  platform: Linux
 #    Oct 04, 2018 03:55:43 PM CEST  platform: Linux
+#    Oct 04, 2018 09:43:21 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -26,6 +27,7 @@ from matplotlib.figure import Figure
 import phase_sim
 from numpy import *
 import codecs
+import copy
 
 try:
     from Tkinter import *
@@ -56,6 +58,10 @@ def set_Tk_var():
     applyfilt = IntVar(0)
     global upload_check
     upload_check = StringVar()
+    global pow_value
+    pow_value = StringVar()
+    global applynoise
+    applynoise = IntVar()
 
 def LoadSim_pressed(p1):
     print('GUI_phase_support.LoadSim_pressed')
@@ -73,8 +79,17 @@ def LoadFile_pressed(e):
 
     
 def Refresh_pressed(p1):
-    global loaddata
-    
+    global loaddata,loaddataprev
+    if applynoise.get():
+        loaddataprev=copy.copy(loaddata)
+        loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
+        #loaddata=[[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
+    else:
+        try:      
+            loaddata=loaddataprev
+        except NameError:
+            print("noise not yet applied")
+            
     if applyfilt.get():
         try:
             fcc=float(freq_cut.get()) 
@@ -144,6 +159,9 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
 
 
 
