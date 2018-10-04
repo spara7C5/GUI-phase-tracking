@@ -11,6 +11,8 @@
 #    Oct 03, 2018 10:46:20 AM CEST  platform: Linux
 #    Oct 03, 2018 02:49:40 PM CEST  platform: Linux
 #    Oct 03, 2018 02:53:50 PM CEST  platform: Linux
+#    Oct 04, 2018 11:28:39 AM CEST  platform: Linux
+#    Oct 04, 2018 11:59:27 AM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -48,12 +50,26 @@ def set_Tk_var():
     
 
 
+
+
+def LoadSim_pressed(p1):
+    print('GUI_phase_support.LoadSim_pressed')
+    print('p1 = {0}'.format(p1))
+    sys.stdout.flush()
+
 def LoadFile_pressed(e):
+    global w,loaddata
+    w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
-    t,c1,c2,c3,c4=phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded)
-    ax1.clear()
-    ax1.plot(t,c1)
-    canvas1.draw()
+    loaddata=phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded)
+
+    
+def Refresh_pressed(p1):
+    plotrefresh(pl4[0],pl4[1],loaddata[1])
+    plotrefresh(pl5[0],pl5[1],loaddata[2])
+    plotrefresh(pl6[0],pl6[1],loaddata[3])
+    plotrefresh(pl7[0],pl7[1],loaddata[4])   
+    
     
 def Search_pressed(e):
     global filename
@@ -65,26 +81,31 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
+    global pl4,pl5,pl6,pl7
     w = gui
     top_level = top
     root = top
-    plotingui()
-  
-def plotingui():
-    global w,ax1,canvas1
-    f1=w.Frame1
-    f= Figure(figsize=(6, 4), dpi=100)
-    ax1= f.add_subplot(111)
-    canvas1 = FCTkAgg(f, f1)
-    toolbar1 = NavigationToolbar2Tk(canvas1, f1 )
-    toolbar1.pack()
-    canvas1.get_tk_widget().pack()
-    
-def LoadSim_pressed(e):
-    print("pressed load")
- 
+    pl4=plotinit(w.Frame4)
+    pl5=plotinit(w.Frame5)
+    pl6=plotinit(w.Frame6)
+    pl7=plotinit(w.Frame7)
 
+def plotinit(framename):
+    global w
+    f1=framename
+    f= Figure(figsize=(6, 4), dpi=100)  
+    ax1= f.add_subplot(111)
+    canvas= FCTkAgg(f, f1)
+    toolbar = NavigationToolbar2Tk(canvas, f1 )
+    toolbar.pack()
+    canvas.get_tk_widget().pack()
+    return ax1, canvas
     
+def plotrefresh(axes, canvasobj,x):
+    axes.clear()
+    axes.plot(x)
+    canvasobj.draw()
+       
 def destroy_window():
     # Function which closes the window.
     global top_level
@@ -96,6 +117,14 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
+
+
 
 
 
