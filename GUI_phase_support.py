@@ -16,6 +16,7 @@
 #    Oct 04, 2018 02:01:37 PM CEST  platform: Linux
 #    Oct 04, 2018 03:55:43 PM CEST  platform: Linux
 #    Oct 04, 2018 09:43:21 PM CEST  platform: Linux
+#    Oct 05, 2018 03:16:45 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -28,6 +29,7 @@ import phase_sim
 from numpy import *
 import codecs
 import copy
+import PSD
 
 try:
     from Tkinter import *
@@ -68,7 +70,7 @@ def set_Tk_var():
     dataorig_f=1
     global noiseenter
     noiseenter=0
-
+    global data_dir_load
 
 
 def LoadSim_pressed(p1):
@@ -76,61 +78,80 @@ def LoadSim_pressed(p1):
     print('p1 = {0}'.format(p1))
     sys.stdout.flush()
 
+
+
+def Refresh_PSD(p1):
+    global loaddata
+    fs=float(freq_samp.get())
+    psd1=PSD.plotpsd(loaddata[1],fs)
+    plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1)
+    psd2=PSD.plotpsd(loaddata[2],fs)
+    plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1)
+    psd3=PSD.plotpsd(loaddata[3],fs)
+    plotrefresh(pl10[0],pl10[1],psd3[0],psd3[1],1)
+    psd4=PSD.plotpsd(loaddata[4],fs)
+    plotrefresh(pl11[0],pl11[1],psd4[0],psd4[1],1)
+
+
 def LoadFile_pressed(e):
-    global w,loaddata,upload_check
+    global w,loaddata,upload_check,data_dir_load
     upload_check.set("Waiting...")
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
     loaddata=list(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+    data_dir_load=1
     upload_check.set("Done!")
     #freq_samp.set(None)
     
 
     
 def Refresh_pressed(p1):
-    global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter
+    global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter,data_dir_load
     
-    try: 
-        fss=float(freq_samp.get())
+    if data_dir_load==0:
+    
+        try: 
+            fss=float(freq_samp.get())
         
-        if applynoise.get():
-            noiseenter=1
-            if dataorig:
-                loaddataprev=copy.copy(loaddata)
-            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
-        else:
-            try:    
-                loaddata=copy.copy(loaddataprev) 
-                dataorig=0
-                noiseenter=0
-            except NameError:
-                print("noise not yet applied")
-           
-
-        try:
-            fcc=float(freq_cut.get())
-            if applyfilt.get():
-                if dataorig_f:
-                    loaddataprev=copy.copy(loaddata)  
-                loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
-     
+            if applynoise.get():
+                noiseenter=1
+                if dataorig:
+                    loaddataprev=copy.copy(loaddata)
+                loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
             else:
-                try:  
-                    if not(noiseenter):  
-                        loaddata=copy.copy(loaddataprev) 
-                        dataorig_f=0
+                try:    
+                    loaddata=copy.copy(loaddataprev) 
+                    dataorig=0
+                    noiseenter=0
                 except NameError:
-                    print("filter not yet applied")   
-        except ValueError:
-            print("data fcut missing!")
+                    print("noise not yet applied")
+           
+            try:
+                fcc=float(freq_cut.get())
+                if applyfilt.get():
+                    if dataorig_f:
+                        loaddataprev=copy.copy(loaddata)  
+                    loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
+     
+                else:
+                    try:  
+                        if not(noiseenter):  
+                            loaddata=copy.copy(loaddataprev) 
+                            dataorig_f=0
+                    except NameError:
+                        print("filter not yet applied")   
+            except ValueError:
+                print("data fcut missing!")
                      
-    except ValueError:
-        print("data fsamp missing") 
-         
+        except ValueError:
+            print("data fsamp missing") 
+            
     plotrefresh(pl4[0],pl4[1],loaddata[1])
     plotrefresh(pl5[0],pl5[1],loaddata[2])
     plotrefresh(pl6[0],pl6[1],loaddata[3])
     plotrefresh(pl7[0],pl7[1],loaddata[4])
+    
+    data_dir_load=0
 
 def Search_pressed(e):
     global filename
@@ -142,7 +163,7 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
-    global pl4,pl5,pl6,pl7
+    global pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11
     w = gui
     top_level = top
     root = top
@@ -151,6 +172,10 @@ def init(top, gui, *args, **kwargs):
     pl5=plotinit(w.Frame5)
     pl6=plotinit(w.Frame6)
     pl7=plotinit(w.Frame7)
+    pl8=plotinit(w.Frame8)
+    pl9=plotinit(w.Frame9)
+    pl10=plotinit(w.Frame10)
+    pl11=plotinit(w.Frame11)
 
 def plotinit(framename):
     global w
@@ -163,9 +188,17 @@ def plotinit(framename):
     canvas.get_tk_widget().pack()
     return ax1, canvas
     
-def plotrefresh(axes, canvasobj,x):
-    axes.clear()
-    axes.plot(x)
+def plotrefresh(ax, canvasobj,x,y=None,logactive=0):
+    ax.clear()
+    try:
+        ax.plot(x,y)
+    except ValueError:
+        ax.plot(x)
+    if logactive:
+        ax.loglog()
+	#xax=ax.get_xaxis().get_major_formatter()
+        #xax.set_powerlimits((1,6))
+        #xax.set_scientific(True)
     canvasobj.draw()
        
 def destroy_window():
@@ -179,6 +212,11 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
 
 
 
