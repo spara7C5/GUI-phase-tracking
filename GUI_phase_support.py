@@ -24,6 +24,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import phase_sim
+from parser_sim import parse_entry
 from numpy import *
 import codecs
 
@@ -48,6 +49,14 @@ def set_Tk_var():
     cont_delim = StringVar()
     global cont_chunck
     cont_chunck = StringVar()
+    global eq_de
+    eq_de = StringVar()
+    global eq_te
+    eq_te = StringVar()
+    global eq_ph
+    eq_ph = StringVar()
+    global point_num
+    point_num = StringVar()
     global freq_cut
     freq_cut = StringVar()
     global freq_samp
@@ -58,9 +67,17 @@ def set_Tk_var():
     upload_check = StringVar()
 
 def LoadSim_pressed(p1):
+    global w
     print('GUI_phase_support.LoadSim_pressed')
     print('p1 = {0}'.format(p1))
     sys.stdout.flush()
+    #equations = [eq_de.get(), eq_te.get(), eq_ph.get()] 
+    #delimiters = [del_de.get(), del_te.get(), del_ph.get()]
+    samples = str(point_num.get())
+    print("points: " + samples)
+    print("eq1: " + str(eq_de.get()))
+    
+    #eq_npy = parse_entry(equations, points)
 
 def LoadFile_pressed(e):
     global w,loaddata,upload_check
