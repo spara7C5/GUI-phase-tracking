@@ -26,7 +26,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import phase_sim
-from parser_sim import parse_entry
+from parser_sim import parse_function, parse_x
 from numpy import *
 import codecs
 import copy
@@ -94,17 +94,31 @@ def LoadSim_pressed(p1):
     print('p1 = {0}'.format(p1))
     sys.stdout.flush()
     #equations = [eq_de.get(), eq_te.get(), eq_ph.get()] 
-    equations = eq_de.get()
-    sampling_times = st_de.get()
-    #sampling_times = [del_de.get(), del_te.get(), del_ph.get()]
     
-    samples = point_num.get()
+    samples = int(point_num.get())
+    # Function de
+    x_de = parse_x(st_de.get(), samples)
+    f_de = parse_function(eq_de.get(), x_de)
+    print("x_de")
+    print(x_de)
+    print("f_de")
+    print(f_de)
     
-    #print("samples type: " + str(type(samples)))
-    print("eq1: " + str(eq_de.get()))
+    # Function te
+    x_te = parse_x(st_te.get(), samples)
+    f_te = parse_function(eq_te.get(), x_te)
+    print("x_te")
+    print(x_te)
+    print("f_te")
+    print(f_te)
     
-    eq_npy = parse_entry(equations, sampling_times, samples)
-
+    # Function ph
+    x_ph = parse_x(st_ph.get(), samples)
+    f_ph = parse_function(eq_ph.get(), x_ph)
+    print("x_ph")
+    print(x_ph)
+    print("f_ph")
+    print(f_ph)
 
 
 def Refresh_PSD(p1):

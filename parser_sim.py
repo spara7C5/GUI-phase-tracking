@@ -4,28 +4,14 @@ import numexpr as ne
 import numpy as np
 import re
 
-def parse_entry(eq_list, sampling_time, samples_num):
+def parse_function(equation, x):
 	
-	eq_list = adjust_equation(eq_list)
-	samples_num = int(samples_num)
-	sampling_time = float(sampling_time)
-	# Create x array 
-	#x = np.arange(0,samples_num, sampling_time)
-	x = np.zeros(samples_num)
-	for index in range(samples_num):
-		x[index] = float(index*sampling_time)
-	np.set_printoptions(threshold=np.nan)
-	print("x[]: ")
-	print(x)
-	print("sampling_times: ")
-	print(sampling_time)
-	print("samples_num: ")
-	print(samples_num)
+	equation = adjust_equation(equation)
 	
 	# Now I have to create function array
-	func = ne.evaluate(eq_list)
-	print("values:")
-	print(func)
+	func = ne.evaluate(equation)
+	
+	return func
 	
 def adjust_equation(eq):
 	#future implementations
@@ -36,3 +22,11 @@ def adjust_equation(eq):
 	
 	return clean_eq
 	
+def parse_x(sampling_time, samples_num):
+	samples_num = int(samples_num)
+	sampling_time = float(sampling_time)
+	
+	x = np.zeros(samples_num)
+	for index in range(samples_num):
+		x[index] = float(index*sampling_time)
+	return x
