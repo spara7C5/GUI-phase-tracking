@@ -30,13 +30,23 @@ def lowfilter(data,fc=1*10**6,fs=2.5*10**6):
 	out4=signal.filtfilt(b, a, data[3])
 	return out1,out2,out3,out4
 
+
+def whitenoise(data,wpow=10**(-11),fs=2.5*10**6):
+	l=len(data[0])
+	sig_noise=sqrt((wpow)*fs/2)
+	out1=data[0]+sig_noise*random.normal(0,1,l)
+	out2=data[1]+sig_noise*random.normal(0,1,l)
+	out3=data[2]+sig_noise*random.normal(0,1,l)
+	out4=data[3]+sig_noise*random.normal(0,1,l)
+	return out1,out2,out3,out4
+
 def tracker():
 	direct_plot_mode=0
 	phase_plot_mode=0
 	plot_details=1
 	residual_plot=1
-	noiseactive=0
-	filteractive=0
+	#noiseactive=0
+	#filteractive=0
 
 
 	t,rex,imx,rey,imy=loader("example_data.txt",100000,'\t')
@@ -45,21 +55,16 @@ def tracker():
 	fs=1/ts
 	####----electronic noise----################
 	sig_noise=1
-	if noiseactive:
-		p=10**(-11)
-		sig_noise=sqrt(p*fs/2)
-		print("sig_noise: ",sig_noise)
-		rex+=sig_noise*random.normal(0,1,len(rex))
-		imx+=sig_noise*random.normal(0,1,len(rex))
-		rey+=sig_noise*random.normal(0,1,len(rex))
-		imy+=sig_noise*random.normal(0,1,len(rex))
+	
+		
+		
 
 	###----IIR filtering------###############
 
 
 
 	#PSD.plotpsd(rex,fs)
-	show()
+	
 
 	####----phases plotting (if need be)----###########
 
