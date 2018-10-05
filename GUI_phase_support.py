@@ -59,6 +59,12 @@ def set_Tk_var():
     eq_te = StringVar()
     global eq_ph
     eq_ph = StringVar()
+    global st_de
+    st_de = StringVar()
+    global st_te
+    st_te = StringVar()
+    global st_ph
+    st_ph = StringVar()
     global point_num
     point_num = StringVar()
     global freq_cut
@@ -88,12 +94,16 @@ def LoadSim_pressed(p1):
     print('p1 = {0}'.format(p1))
     sys.stdout.flush()
     #equations = [eq_de.get(), eq_te.get(), eq_ph.get()] 
-    #delimiters = [del_de.get(), del_te.get(), del_ph.get()]
-    samples = str(point_num.get())
-    print("points: " + samples)
+    equations = eq_de.get()
+    sampling_times = st_de.get()
+    #sampling_times = [del_de.get(), del_te.get(), del_ph.get()]
+    
+    samples = point_num.get()
+    
+    #print("samples type: " + str(type(samples)))
     print("eq1: " + str(eq_de.get()))
     
-    #eq_npy = parse_entry(equations, points)
+    eq_npy = parse_entry(equations, sampling_times, samples)
 
 
 

@@ -221,6 +221,7 @@ class PHASE_TRACKING_GUI:
         self.Entry5.place(relx=0.308, rely=0.215,height=21, relwidth=0.068)
         self.Entry5.configure(background="white")
         self.Entry5.configure(font="TkFixedFont")
+        self.Entry5.configure(textvariable=GUI_phase_support.st_de)
         self.Entry5.configure(selectbackground="#c4c4c4")
 
         self.Label7 = Label(self.Frame3)
@@ -232,12 +233,14 @@ class PHASE_TRACKING_GUI:
         self.Entry6.place(relx=0.308, rely=0.366,height=21, relwidth=0.068)
         self.Entry6.configure(background="white")
         self.Entry6.configure(font="TkFixedFont")
+        self.Entry6.configure(textvariable=GUI_phase_support.st_te)
         self.Entry6.configure(selectbackground="#c4c4c4")
 
         self.Entry7 = Entry(self.Frame3)
         self.Entry7.place(relx=0.308, rely=0.516,height=21, relwidth=0.068)
         self.Entry7.configure(background="white")
         self.Entry7.configure(font="TkFixedFont")
+        self.Entry7.configure(textvariable=GUI_phase_support.st_ph)
         self.Entry7.configure(selectbackground="#c4c4c4")
 
         self.point_num_entry = Entry(self.Frame3)
