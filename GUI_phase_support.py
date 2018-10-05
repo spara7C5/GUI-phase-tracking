@@ -62,6 +62,14 @@ def set_Tk_var():
     pow_value = StringVar()
     global applynoise
     applynoise = IntVar()
+    global dataorig
+    dataorig=1
+    global dataorig_f
+    dataorig_f=1
+    global noiseenter
+    noiseenter=0
+
+
 
 def LoadSim_pressed(p1):
     print('GUI_phase_support.LoadSim_pressed')
@@ -75,43 +83,55 @@ def LoadFile_pressed(e):
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
     loaddata=list(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
     upload_check.set("Done!")
+    #freq_samp.set(None)
     
 
     
 def Refresh_pressed(p1):
-    global loaddata,loaddataprev
-    if applynoise.get():
-        loaddataprev=copy.copy(loaddata)
-        loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
-        #loaddata=[[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
-    else:
-        try:      
-            loaddata=loaddataprev
-        except NameError:
-            print("noise not yet applied")
-            
-    if applyfilt.get():
-        try:
-            fcc=float(freq_cut.get()) 
-        except ValueError:
-            fcc=1000;fss=2500000
-        try:
-            fss=float(freq_samp.get())
-        except ValueError:
-            fcc=1000;fss=2500000
-        print(float(freq_cut.get()))
-        loaddatafil=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
-        plotrefresh(pl4[0],pl4[1],loaddatafil[0])
-        plotrefresh(pl5[0],pl5[1],loaddatafil[1])
-        plotrefresh(pl6[0],pl6[1],loaddatafil[2])
-        plotrefresh(pl7[0],pl7[1],loaddatafil[3]) 
-    else:  
-        plotrefresh(pl4[0],pl4[1],loaddata[1])
-        plotrefresh(pl5[0],pl5[1],loaddata[2])
-        plotrefresh(pl6[0],pl6[1],loaddata[3])
-        plotrefresh(pl7[0],pl7[1],loaddata[4])   
+    global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter
     
-    
+    try: 
+        fss=float(freq_samp.get())
+        
+        if applynoise.get():
+            noiseenter=1
+            if dataorig:
+                loaddataprev=copy.copy(loaddata)
+            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
+        else:
+            try:    
+                loaddata=copy.copy(loaddataprev) 
+                dataorig=0
+                noiseenter=0
+            except NameError:
+                print("noise not yet applied")
+           
+
+        try:
+            fcc=float(freq_cut.get())
+            if applyfilt.get():
+                if dataorig_f:
+                    loaddataprev=copy.copy(loaddata)  
+                loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
+     
+            else:
+                try:  
+                    if not(noiseenter):  
+                        loaddata=copy.copy(loaddataprev) 
+                        dataorig_f=0
+                except NameError:
+                    print("filter not yet applied")   
+        except ValueError:
+            print("data fcut missing!")
+                     
+    except ValueError:
+        print("data fsamp missing") 
+         
+    plotrefresh(pl4[0],pl4[1],loaddata[1])
+    plotrefresh(pl5[0],pl5[1],loaddata[2])
+    plotrefresh(pl6[0],pl6[1],loaddata[3])
+    plotrefresh(pl7[0],pl7[1],loaddata[4])
+
 def Search_pressed(e):
     global filename
     name=filedialog.askopenfilename(initialdir=".")
@@ -159,6 +179,10 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
 
 
 
