@@ -39,6 +39,12 @@ pip install numpy scipy
 pip install numexpr 
 ```
 
+* matplotlib python module
+
+```
+pip install matplotlib
+```
+
 ## Running 
 
 Open a terminal and go to the GUI-phase-tracking directory.
