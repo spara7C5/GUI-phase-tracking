@@ -24,7 +24,7 @@ def parse_function(equation, x):
 	
 	equation = adjust_equation(equation)
 	
-	if None == a:
+	if None == x.any():
 		print("Error, unable to find x array")
 		return -1
 	# Now I have to create function array
