@@ -26,6 +26,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import phase_sim
+from parser_sim import parse_function, parse_x
 from numpy import *
 import codecs
 import copy
@@ -52,6 +53,20 @@ def set_Tk_var():
     cont_delim = StringVar()
     global cont_chunck
     cont_chunck = StringVar()
+    global eq_de
+    eq_de = StringVar()
+    global eq_te
+    eq_te = StringVar()
+    global eq_ph
+    eq_ph = StringVar()
+    global st_de
+    st_de = StringVar()
+    global st_te
+    st_te = StringVar()
+    global st_ph
+    st_ph = StringVar()
+    global point_num
+    point_num = StringVar()
     global freq_cut
     freq_cut = StringVar()
     global freq_samp
@@ -74,10 +89,36 @@ def set_Tk_var():
 
 
 def LoadSim_pressed(p1):
+    global w
     print('GUI_phase_support.LoadSim_pressed')
     print('p1 = {0}'.format(p1))
     sys.stdout.flush()
-
+    #equations = [eq_de.get(), eq_te.get(), eq_ph.get()] 
+    
+    samples = int(point_num.get())
+    # Function de
+    x_de = parse_x(st_de.get(), samples)
+    f_de = parse_function(eq_de.get(), x_de)
+    print("x_de")
+    print(x_de)
+    print("f_de")
+    print(f_de)
+    
+    # Function te
+    x_te = parse_x(st_te.get(), samples)
+    f_te = parse_function(eq_te.get(), x_te)
+    print("x_te")
+    print(x_te)
+    print("f_te")
+    print(f_te)
+    
+    # Function ph
+    x_ph = parse_x(st_ph.get(), samples)
+    f_ph = parse_function(eq_ph.get(), x_ph)
+    print("x_ph")
+    print(x_ph)
+    print("f_ph")
+    print(f_ph)
 
 
 def Refresh_PSD(p1):
