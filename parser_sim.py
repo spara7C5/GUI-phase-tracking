@@ -3,13 +3,33 @@
 import numexpr as ne
 import numpy as np
 import re
+from scipy import constants as consts
+
+# x variable is initialized to None (NoneType)
+# When I call parse_x I update the value of x to the actual domain array
+# After I've evaluated the function I set x again to None in order to
+# remember to change the x array for the new function
+
+const_dic = {
+	'x' : None,
+	'pi' : consts.pi,
+	'e' : consts.e,
+	'phi' : consts.golden,
+	'eps_0' : consts.epsilon_0,
+	'mu_0' : consts.mu_0,
+	'g' : consts.G
+}
 
 def parse_function(equation, x):
 	
 	equation = adjust_equation(equation)
 	
+	if None == a:
+		print("Error, unable to find x array")
+		return -1
 	# Now I have to create function array
-	func = ne.evaluate(equation)
+	func = ne.evaluate(equation,const_dic)
+	const_dic['x'] = None
 	
 	return func
 	
@@ -29,4 +49,5 @@ def parse_x(sampling_time, samples_num):
 	x = np.zeros(samples_num)
 	for index in range(samples_num):
 		x[index] = float(index*sampling_time)
+	const_dic['x'] = x
 	return x
