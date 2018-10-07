@@ -40,6 +40,17 @@ def whitenoise(data,wpow=10**(-11),fs=2.5*10**6):
 	out4=data[3]+sig_noise*random.normal(0,1,l)
 	return out1,out2,out3,out4
 
+def downconvert(x,flo):
+	ts=x[0,10]-x[0,9]
+	print("tsamp is:",ts)
+	n=arange(len(x[1]))
+	lo=cos(2*pi*flo*n*ts)
+	out1=x[1]*lo
+	out2=x[2]*lo
+	out3=x[3]*lo	
+	out4=x[4]*lo
+	return out1,out2,out3,out4	
+
 def tracker():
 	direct_plot_mode=0
 	phase_plot_mode=0

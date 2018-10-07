@@ -17,6 +17,7 @@
 #    Oct 04, 2018 03:55:43 PM CEST  platform: Linux
 #    Oct 04, 2018 09:43:21 PM CEST  platform: Linux
 #    Oct 05, 2018 03:16:45 PM CEST  platform: Linux
+#    Oct 07, 2018 08:02:53 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -61,10 +62,6 @@ def set_Tk_var():
     eq_ph = StringVar()
     global st_de
     st_de = StringVar()
-    global st_te
-    st_te = StringVar()
-    global st_ph
-    st_ph = StringVar()
     global point_num
     point_num = StringVar()
     global freq_cut
@@ -87,39 +84,25 @@ def set_Tk_var():
     noiseenter=0
     global data_dir_load
 
+    global lo_mix
+    lo_mix = IntVar(0)
+    global freq_lo
+    freq_lo = StringVar()
 
 def LoadSim_pressed(p1):
     global w
-    print('GUI_phase_support.LoadSim_pressed')
-    print('p1 = {0}'.format(p1))
-    sys.stdout.flush()
-    #equations = [eq_de.get(), eq_te.get(), eq_ph.get()] 
     
     samples = int(point_num.get())
-    # Function de
+    
     x_de = parse_x(st_de.get(), samples)
     f_de = parse_function(eq_de.get(), x_de)
-    print("x_de")
-    print(x_de)
-    print("f_de")
-    print(f_de)
-    
-    # Function te
-    x_te = parse_x(st_te.get(), samples)
-    f_te = parse_function(eq_te.get(), x_te)
-    print("x_te")
-    print(x_te)
-    print("f_te")
-    print(f_te)
-    
-    # Function ph
-    x_ph = parse_x(st_ph.get(), samples)
-    f_ph = parse_function(eq_ph.get(), x_ph)
-    print("x_ph")
-    print(x_ph)
-    print("f_ph")
-    print(f_ph)
+    x_de= parse_x(st_de.get(), samples)
+    f_te = parse_function(eq_te.get(), x_de)
+    x_de= parse_x(st_de.get(), samples)
+    f_ph = parse_function(eq_ph.get(), x_de)
 
+    plots=array([f_de,f_te,f_ph])
+    plotrefresh(pl1[0],pl1[1],plots)
 
 def Refresh_PSD(p1):
     global loaddata
@@ -139,7 +122,9 @@ def LoadFile_pressed(e):
     upload_check.set("Waiting...")
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
-    loaddata=list(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+    loaddata=array(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+    if lo_mix:
+        loaddata[1:5]=phase_sim.downconvert(loaddata,float(freq_lo.get()))
     data_dir_load=1
     upload_check.set("Done!")
     #freq_samp.set(None)
@@ -192,7 +177,12 @@ def Refresh_pressed(p1):
     plotrefresh(pl6[0],pl6[1],loaddata[3])
     plotrefresh(pl7[0],pl7[1],loaddata[4])
     
-    data_dir_load=0
+    if data_dir_load==1:
+        try:
+            loaddataprev=copy.copy(loaddata)
+        except NameError:
+            print("first data load")
+        data_dir_load=0
 
 def Search_pressed(e):
     global filename
@@ -204,7 +194,7 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
-    global pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11
+    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11
     w = gui
     top_level = top
     root = top
@@ -234,10 +224,14 @@ def plotrefresh(ax, canvasobj,x,y=None,logactive=0):
     try:
         ax.plot(x,y)
     except ValueError:
-        ax.plot(x)
+        if len(x.shape)>1:
+            for i in x:
+                ax.plot(i)
+        else:
+            ax.plot(x)
     if logactive:
         ax.loglog()
-	#xax=ax.get_xaxis().get_major_formatter()
+    #xax=ax.get_xaxis().get_major_formatter()
         #xax.set_powerlimits((1,6))
         #xax.set_scientific(True)
     canvasobj.draw()
@@ -245,6 +239,8 @@ def plotrefresh(ax, canvasobj,x,y=None,logactive=0):
 def destroy_window():
     # Function which closes the window.
     global top_level
+    
+    print("exiting")
     top_level.destroy()
     top_level = None
     
@@ -253,6 +249,13 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
+
 
 
 
