@@ -18,6 +18,8 @@
 #    Oct 04, 2018 09:43:21 PM CEST  platform: Linux
 #    Oct 05, 2018 03:16:45 PM CEST  platform: Linux
 #    Oct 07, 2018 08:02:53 PM CEST  platform: Linux
+#    Oct 07, 2018 11:56:10 PM CEST  platform: Linux
+#    Oct 08, 2018 10:57:13 AM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -32,6 +34,7 @@ from numpy import *
 import codecs
 import copy
 import PSD
+import datagenerator
 
 try:
     from Tkinter import *
@@ -83,14 +86,22 @@ def set_Tk_var():
     global noiseenter
     noiseenter=0
     global data_dir_load
-
     global lo_mix
     lo_mix = IntVar(0)
     global freq_lo
     freq_lo = StringVar()
+    global check_track
+    check_track = StringVar()
 
+def track_start(p1):
+    global loaddata
+    check_track.set("Wait...")
+    phil=phase_sim.tracker(loaddata)
+    plotrefresh(pl12[0],pl12[1],phil,col="red")
+    check_track.set("Done...")
+    
 def LoadSim_pressed(p1):
-    global w
+    global w,loaddata,data_dir_load
     
     samples = int(point_num.get())
     
@@ -102,7 +113,10 @@ def LoadSim_pressed(p1):
     f_ph = parse_function(eq_ph.get(), x_de)
 
     plots=array([f_de,f_te,f_ph])
-    plotrefresh(pl1[0],pl1[1],plots)
+    plotrefresh(pl1[0],pl1[1],plots,col=['r',"orange","green"])
+    loaddata=list(datagenerator.datagen(f_de,f_te,f_ph))
+    loaddata.insert(0,zeros(samples))
+    data_dir_load=1
 
 def Refresh_PSD(p1):
     global loaddata
@@ -123,8 +137,10 @@ def LoadFile_pressed(e):
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
     loaddata=array(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+
     if lo_mix:
         loaddata[1:5]=phase_sim.downconvert(loaddata,float(freq_lo.get()))
+
     data_dir_load=1
     upload_check.set("Done!")
     #freq_samp.set(None)
@@ -184,6 +200,7 @@ def Refresh_pressed(p1):
             print("first data load")
         data_dir_load=0
 
+
 def Search_pressed(e):
     global filename
     name=filedialog.askopenfilename(initialdir=".")
@@ -194,7 +211,7 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
-    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11
+    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11,pl12
     w = gui
     top_level = top
     root = top
@@ -207,6 +224,7 @@ def init(top, gui, *args, **kwargs):
     pl9=plotinit(w.Frame9)
     pl10=plotinit(w.Frame10)
     pl11=plotinit(w.Frame11)
+    pl12=plotinit(w.Frame12)
 
 def plotinit(framename):
     global w
@@ -219,16 +237,16 @@ def plotinit(framename):
     canvas.get_tk_widget().pack()
     return ax1, canvas
     
-def plotrefresh(ax, canvasobj,x,y=None,logactive=0):
+def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b'):
     ax.clear()
     try:
         ax.plot(x,y)
     except ValueError:
         if len(x.shape)>1:
-            for i in x:
-                ax.plot(i)
+            for n,i in enumerate(x):
+                ax.plot(i,col[n])
         else:
-            ax.plot(x)
+            ax.plot(x,color=col)
     if logactive:
         ax.loglog()
     #xax=ax.get_xaxis().get_major_formatter()
@@ -249,6 +267,16 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
+
+
+
+
 
 
 
