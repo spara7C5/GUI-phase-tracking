@@ -53,7 +53,10 @@ except ImportError:
 CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
 LAST_ENTRY_NAME = 'last_entry.ini'
 # End Config files
-    last_entry_conf = configparser.ConfigParser()
+
+last_entry_conf = configparser.ConfigParser()
+func_read = []
+samples = int()
 
 def set_Tk_var():
     global contEntry1,filename
@@ -140,10 +143,10 @@ def read_last_entry():
     last_entry_conf.read(CONFIG_PATH / LAST_ENTRY_NAME)
     # Equations
     for i_eq in func_read:
-       eq.append(last_entry_conf.get('EQUATIONS','eq_' + str(i_eq+1), func_read[i]))
-    # Sampling times
+        eq.append(last_entry_conf.get('EQUATIONS','eq_' + str(i_eq+1), func_read[i]))
+        # Sampling times
         times.append(last_entry_conf.get('SAMPLING_TIMES', 'eq_' + str(i_eq+1), times_read[i]))
-    # Number of sampling
+        # Number of sampling
     num = last_entry_conf.get('N_SAMPLING', 'num', samples)
     
     # Now I'll fill the Entries
@@ -170,7 +173,7 @@ def LoadSim_pressed(p1):
     last_x = parse_x(times_read,samples)
     last_func = parse_function(func_read)
 
-    plots=array([np.asarray(last_func))
+    plots=array(np.asarray(last_func))
     plotrefresh(pl1[0],pl1[1],plots)
 
 def Refresh_PSD(p1):
@@ -267,6 +270,7 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
+    top.protocol('WM_DELETE_WINDOW',on_closing())
     pl1=plotinit(w.Frame1)
     pl4=plotinit(w.Frame4)
     pl5=plotinit(w.Frame5)
