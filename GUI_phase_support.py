@@ -18,6 +18,7 @@
 #    Oct 04, 2018 09:43:21 PM CEST  platform: Linux
 #    Oct 05, 2018 03:16:45 PM CEST  platform: Linux
 #    Oct 07, 2018 08:02:53 PM CEST  platform: Linux
+#    Oct 08, 2018 11:31:23 AM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -32,6 +33,8 @@ from numpy import *
 import codecs
 import copy
 import PSD
+import pathlib
+import configparser
 
 try:
     from Tkinter import *
@@ -44,6 +47,13 @@ try:
 except ImportError:
     import tkinter.ttk as ttk
     py3 = True
+
+
+# Config files:
+CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
+LAST_ENTRY_NAME = 'last_entry.ini'
+# End Config files
+
 
 def set_Tk_var():
     global contEntry1,filename
@@ -89,19 +99,67 @@ def set_Tk_var():
     global freq_lo
     freq_lo = StringVar()
 
+
+
+def on_closing():
+    print('GUI_phase_support.on_closing')
+    #sys.stdout.flush()
+    
+    # Let's create LAST_ENTRY_NAME file:
+    
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.mkdir()
+        
+    if not CONFIG_PATH / LAST_ENTRY_NAME).exists():
+        create_last_entry()
+    else:
+        update_last_entry()
+    
+    destroy_window()
+
+def create_last_entry():
+    last_entry_conf = configparser.ConfigParser()
+    
+    last_entry_conf.add_section('EQUATIONS')
+    last_entry_conf.add_section('SAMPLING_TIMES')
+    last_entry_conf.add_section('N_SAMPLING')
+        
+    update_last_entry()
+
+def update_last_entry():
+    # Equations
+    for i_eq in func_read:
+        last_entry_conf.set('EQUATIONS','eq_' + str(i_eq+1), func_read[i])
+    # Sampling times
+        last_entry_conf.set('SAMPLING_TIMES', 'eq_' + str(i_eq+1), times_read[i])
+    # Number of sampling
+    last_entry_conf.set('N_SAMPLING', 'num', samples)
+    last_entry_conf.write(CONFIG_PATH / LAST_ENTRY_NAME)
+    
+def read_last_entry():
+    
+
 def LoadSim_pressed(p1):
     global w
     
     samples = int(point_num.get())
     
-    x_de = parse_x(st_de.get(), samples)
-    f_de = parse_function(eq_de.get(), x_de)
-    x_de= parse_x(st_de.get(), samples)
-    f_te = parse_function(eq_te.get(), x_de)
-    x_de= parse_x(st_de.get(), samples)
-    f_ph = parse_function(eq_ph.get(), x_de)
+    times_read = [st_de.get(), st_te.get(), st_ph.get()]
+    times_read = list(map(int, times_read)) 
+    
+    func_read = [eq_de.get(), eq_te.get(), eq_ph.get()]
+    
+    #x_de = parse_x(st_de.get(), samples)
+    #f_de = parse_function(eq_de.get(), x_de)
+    #x_de= parse_x(st_de.get(), samples)
+    #f_te = parse_function(eq_te.get(), x_de)
+    #x_de= parse_x(st_de.get(), samples)
+    #f_ph = parse_function(eq_ph.get(), x_de)
+    
+    last_x = parse_x(times_read,samples)
+    last_func = parse_function(func_read)
 
-    plots=array([f_de,f_te,f_ph])
+    plots=array([np.asarray(last_func))
     plotrefresh(pl1[0],pl1[1],plots)
 
 def Refresh_PSD(p1):
@@ -249,6 +307,9 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
 
 
 

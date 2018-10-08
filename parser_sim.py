@@ -11,7 +11,9 @@ from scipy import constants as consts
 # remember to change the x array for the new function
 
 const_dic = {
-	'x' : None,
+	'x1' : None,
+	'x2' : None,
+	'x3' : None,
 	'pi' : consts.pi,
 	'e' : consts.e,
 	'phi' : consts.golden,
@@ -20,16 +22,30 @@ const_dic = {
 	'g' : consts.G
 }
 
-def parse_function(equation, x):
+def parse_function(equation):
 	
-	equation = adjust_equation(equation)
+	# I'll read x arrays from the dictionary
 	
-	if None == x.any():
+	#for eq in equation:
+	#    equation[eq] = adjust_equation(equation[eq])
+	    
+    equation  = [adjust_equation(i) for i in equation]
+	
+	if all(v is None for v in x):
 		print("Error, unable to find x array")
 		return -1
 	# Now I have to create function array
-	func = ne.evaluate(equation,const_dic)
-	const_dic['x'] = None
+	for i_eq in range(len(equation)):
+	    # I rename the key of the actual x in x so I'm sure that the program won't use others vars
+	    const_dic['x'] = const_dic.pop('x' + str(i_eq+1))
+	    func[i_eq] = ne.evaluate(equation[i_eq],const_dic)
+	    const_dic['x' + str(i_eq+1)] = const_dic.pop('x')  
+	    
+	# So if I want to calculate just one func I don't delete the other funcs
+	if len(equation) > 1:    
+	    for i_dic in range(3):
+	        const_dic['x' + str(i+1)] = None
+	    
 	
 	return func
 	
@@ -42,12 +58,19 @@ def adjust_equation(eq):
 	
 	return clean_eq
 	
-def parse_x(sampling_time, samples_num):
+def parse_x(sampling_times, samples_num):
+	# It accepts 3 sample times
 	samples_num = int(samples_num)
-	sampling_time = float(sampling_time)
 	
-	x = np.zeros(samples_num)
-	for index in range(samples_num):
-		x[index] = float(index*sampling_time)
-	const_dic['x'] = x
+	# Convert into int
+	sampling_times = list(map(int, sampling_times)) 
+	
+	x = [np.zeros(samples_num) for i in range(len(sampling_times))]
+	for i_time in sampling_times:
+	    for i_num in range(samples_num):
+		    x[i_num] = float(index*sampling_times[i_time])
+		    
+	for i in range(3):
+	    const_dic['x' + str(i+1)] = x[i]
+	    
 	return x
