@@ -53,7 +53,7 @@ except ImportError:
 CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
 LAST_ENTRY_NAME = 'last_entry.ini'
 # End Config files
-
+    last_entry_conf = configparser.ConfigParser()
 
 def set_Tk_var():
     global contEntry1,filename
@@ -110,21 +110,18 @@ def on_closing():
     if not CONFIG_PATH.exists():
         CONFIG_PATH.mkdir()
         
-    if not CONFIG_PATH / LAST_ENTRY_NAME).exists():
+    if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
         create_last_entry()
-    else:
-        update_last_entry()
+    update_last_entry()
     
     destroy_window()
 
 def create_last_entry():
-    last_entry_conf = configparser.ConfigParser()
+
     
     last_entry_conf.add_section('EQUATIONS')
     last_entry_conf.add_section('SAMPLING_TIMES')
     last_entry_conf.add_section('N_SAMPLING')
-        
-    update_last_entry()
 
 def update_last_entry():
     # Equations
@@ -137,7 +134,21 @@ def update_last_entry():
     last_entry_conf.write(CONFIG_PATH / LAST_ENTRY_NAME)
     
 def read_last_entry():
+    eq = list()
+    times = list()
     
+    last_entry_conf.read(CONFIG_PATH / LAST_ENTRY_NAME)
+    # Equations
+    for i_eq in func_read:
+       eq.append(last_entry_conf.get('EQUATIONS','eq_' + str(i_eq+1), func_read[i]))
+    # Sampling times
+        times.append(last_entry_conf.get('SAMPLING_TIMES', 'eq_' + str(i_eq+1), times_read[i]))
+    # Number of sampling
+    num = last_entry_conf.get('N_SAMPLING', 'num', samples)
+    
+    # Now I'll fill the Entries
+    
+    return {'eq' : eq, 'times' : times, 'num' : num}   
 
 def LoadSim_pressed(p1):
     global w
@@ -265,7 +276,25 @@ def init(top, gui, *args, **kwargs):
     pl9=plotinit(w.Frame9)
     pl10=plotinit(w.Frame10)
     pl11=plotinit(w.Frame11)
+    
+    on_load()
+    
+def on_load():
 
+    if (CONFIG_PATH / LAST_ENTRY_NAME).exists():
+
+        tmp_dic = read_last_entry()
+        # equations
+        eq_de.set(tmp_dic.get('eq')[0])
+        eq_te.set(tmp_dic.get('eq')[1])
+        eq_ph.set(tmp_dic.get('eq')[2])
+        # Sampling times
+        st_de.set(tmp_dic.get('times')[0])
+        st_te.set(tmp_dic.get('times')[1])
+        st_ph.set(tmp_dic.get('times')[2])
+        # Sample number
+        point_num.set(tmp_dic.get('num'))
+    
 def plotinit(framename):
     global w
     f1=framename
