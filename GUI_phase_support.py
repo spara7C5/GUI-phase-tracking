@@ -88,6 +88,7 @@ def set_Tk_var():
     global noiseenter
     noiseenter=0
     global data_dir_load
+    global issim
     global lo_mix
     lo_mix = IntVar(0)
     global freq_lo
@@ -114,9 +115,11 @@ def track_start(p1):
     tot=array([dell,thel,phil])
     plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"])
     check_track.set("Done...")
+    if issim:
+        plotrefresh(pl14[0],pl14[1],phil-f_ph,col="green")
     
 def LoadSim_pressed(p1):
-    global w,loaddata,data_dir_load
+    global w,loaddata,data_dir_load,issim,f_ph
     
     samples = int(point_num.get())
     
@@ -132,6 +135,7 @@ def LoadSim_pressed(p1):
     loaddata=list(datagenerator.datagen(f_de,f_te,f_ph))
     loaddata.insert(0,zeros(samples))
     data_dir_load=1
+    issim=1
 
 def Refresh_PSD(p1):
     global loaddata
@@ -159,6 +163,7 @@ def LoadFile_pressed(e):
     if downsamp.get():
         loaddata=array(phase_sim.downsampl(loaddata,int(num_down.get())))
     data_dir_load=1
+    issim=0
     upload_check.set("Done!")
 
     
@@ -228,7 +233,7 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
-    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11,pl12,pl13
+    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11,pl12,pl13,pl14
     w = gui
     top_level = top
     root = top
@@ -243,6 +248,7 @@ def init(top, gui, *args, **kwargs):
     pl11=plotinit(w.Frame11)
     pl12=plotinit(w.Frame12)
     pl13=plotinit(w.Frame13)
+    pl14=plotinit(w.Frame14)
 
 def plotinit(framename):
     global w
@@ -285,6 +291,8 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
 
 
 
