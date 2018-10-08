@@ -20,6 +20,8 @@
 #    Oct 07, 2018 08:02:53 PM CEST  platform: Linux
 #    Oct 07, 2018 11:56:10 PM CEST  platform: Linux
 #    Oct 08, 2018 10:57:13 AM CEST  platform: Linux
+#    Oct 08, 2018 01:57:02 PM CEST  platform: Linux
+#    Oct 08, 2018 03:31:30 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -92,12 +94,25 @@ def set_Tk_var():
     freq_lo = StringVar()
     global check_track
     check_track = StringVar()
+    global downsamp
+    downsamp = IntVar(0)
+    global num_down
+    num_down = StringVar()
 
+
+
+
+def psd_phi(p1):
+    fs=float(freq_samp.get())
+    psd13=PSD.plotpsd(phil,fs)
+    plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1)
+    
 def track_start(p1):
-    global loaddata
+    global loaddata,phil
     check_track.set("Wait...")
-    phil=phase_sim.tracker(loaddata)
-    plotrefresh(pl12[0],pl12[1],phil,col="red")
+    dell,thel,phil=phase_sim.tracker(loaddata)
+    tot=array([dell,thel,phil])
+    plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"])
     check_track.set("Done...")
     
 def LoadSim_pressed(p1):
@@ -137,13 +152,15 @@ def LoadFile_pressed(e):
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
     loaddata=array(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
-
-    if lo_mix:
+    
+    
+    if lo_mix.get():
         loaddata[1:5]=phase_sim.downconvert(loaddata,float(freq_lo.get()))
-
+    if downsamp.get():
+        loaddata=array(phase_sim.downsampl(loaddata,int(num_down.get())))
     data_dir_load=1
     upload_check.set("Done!")
-    #freq_samp.set(None)
+
     
 
     
@@ -211,7 +228,7 @@ def Search_pressed(e):
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
-    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11,pl12
+    global pl1,pl4,pl5,pl6,pl7,pl8,pl9,pl10,pl11,pl12,pl13
     w = gui
     top_level = top
     root = top
@@ -225,6 +242,7 @@ def init(top, gui, *args, **kwargs):
     pl10=plotinit(w.Frame10)
     pl11=plotinit(w.Frame11)
     pl12=plotinit(w.Frame12)
+    pl13=plotinit(w.Frame13)
 
 def plotinit(framename):
     global w
@@ -267,6 +285,12 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
+
 
 
 

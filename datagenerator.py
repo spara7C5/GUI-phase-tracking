@@ -45,8 +45,9 @@ def datagen(dearr,thearr,phiarr):
 		rey.append(Eyr)
 		imy.append(Eyi)
 		
-		
-	return array(rex), array(imx), array(rey), array(imy)
+	#the order of the output is the same of the 
+	#experimental setup real-imag-imag-real	
+	return array(rex), array(imx), array(imy), array(rey)
 
 
 

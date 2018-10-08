@@ -49,7 +49,15 @@ def downconvert(x,flo):
 	out2=x[2]*lo
 	out3=x[3]*lo	
 	out4=x[4]*lo
-	return out1,out2,out3,out4	
+	return out1,out2,out3,out4
+
+def downsampl(x,ns):
+	out1=signal.decimate(x[0], ns)
+	out2=signal.decimate(x[1], ns)
+	out3=signal.decimate(x[2], ns)
+	out4=signal.decimate(x[3], ns)
+	out5=signal.decimate(x[4], ns)
+	return out1,out2, out3,out4,out5
 
 def tracker(data):
 	direct_plot_mode=0
@@ -63,14 +71,9 @@ def tracker(data):
 
 	rex=data[1]
 	imx=data[2]
-	rey=data[3]
-	imy=data[4]
+	imy=data[3]
+	rey=data[4]
 	
-	print(rex)
-	print(imx)
-	print(rey)
-	print(imy)
-
 
 
 	########################################
@@ -209,7 +212,7 @@ def tracker(data):
 
 	#
 
-	return array(dell)
+	return array(dell),array(thel),array(phil)
 
 	
 
