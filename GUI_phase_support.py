@@ -22,6 +22,7 @@
 #    Oct 08, 2018 10:57:13 AM CEST  platform: Linux
 #    Oct 08, 2018 01:57:02 PM CEST  platform: Linux
 #    Oct 08, 2018 03:31:30 PM CEST  platform: Linux
+#    Oct 08, 2018 05:08:12 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -30,6 +31,7 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
+from matplotlib.pyplot import figure
 import phase_sim
 from parser_sim import parse_function, parse_x
 from numpy import *
@@ -93,6 +95,7 @@ def set_Tk_var():
     lo_mix = IntVar(0)
     global freq_lo
     freq_lo = StringVar()
+    
     global check_track
     check_track = StringVar()
     global downsamp
@@ -102,6 +105,21 @@ def set_Tk_var():
 
 
 
+    global rand_de
+    rand_de = StringVar()
+    global che49
+    che49 = StringVar()
+    global che52
+    che52 = StringVar()
+
+def phipsd_pressed(p1):
+    psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
+    f=figure()
+    ax=f.add_subplot(111)
+    ax.plot(psd00[0],psd00[1])
+    ax.loglog()
+    f.show()
+    sys.stdout.flush()
 
 def psd_phi(p1):
     fs=float(freq_samp.get())
@@ -291,6 +309,9 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
 
 
 
