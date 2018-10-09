@@ -20,16 +20,16 @@ const_dic = {
 	'g' : consts.G
 }
 
-def parse_function(equation, x):
+def parse_function(equation):
 	
 	equation = adjust_equation(equation)
 	
-	if None == x.any():
-		print("Error, unable to find x array")
-		return -1
+	#if None == x.any():
+	#	print("Error, unable to find x array")
+	#	return -1
 	# Now I have to create function array
 	func = ne.evaluate(equation,const_dic)
-	const_dic['x'] = None
+	#const_dic['x'] = None
 	
 	return func
 	
@@ -50,4 +50,4 @@ def parse_x(sampling_time, samples_num):
 	for index in range(samples_num):
 		x[index] = float(index*sampling_time)
 	const_dic['x'] = x
-	return x
+	#return x

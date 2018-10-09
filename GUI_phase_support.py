@@ -91,6 +91,8 @@ def set_Tk_var():
     dataorig_f=1
     global noiseenter
     noiseenter=0
+    global filtenter
+    filtenter=0
     global data_dir_load
     global issim
     global lo_mix
@@ -162,12 +164,12 @@ def LoadSim_pressed(p1):
     
     samples = int(point_num.get())
     
-    x_de = parse_x(st_de.get(), samples)
-    f_de = parse_function(eq_de.get(), x_de)
-    x_de= parse_x(st_de.get(), samples)
-    f_te = parse_function(eq_te.get(), x_de)
-    x_de= parse_x(st_de.get(), samples)
-    f_ph = parse_function(eq_ph.get(), x_de)
+    parse_x(st_de.get(), samples)
+    f_de = parse_function(eq_de.get())
+    #x_de= parse_x(st_de.get(), samples)
+    f_te = parse_function(eq_te.get())
+    #x_de= parse_x(st_de.get(), samples)
+    f_ph = parse_function(eq_ph.get())
     
     fun_list=array([f_de,f_te,f_ph])
     ck_list=[ck_rand_de.get(),ck_rand_te.get(),ck_rand_ph.get()]
@@ -223,9 +225,14 @@ def LoadFile_pressed(e):
 
     
 
-    
+#    idea of the refresh button:
+# the action  (filter and/or noise) is always applied to the data currently displayed
+# except when no data is selected. In the latter case we come back to original data.
+# When both the action are selected, the noise is applied before the filter
+#
+
 def Refresh_pressed(p1):
-    global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter,data_dir_load
+    global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter,filtenter,data_dir_load
     
     if data_dir_load==1:
         try:
@@ -234,44 +241,47 @@ def Refresh_pressed(p1):
             print("first data load")
         data_dir_load=0
         
-    if data_dir_load==0:
-    
-        try: 
-            fss=float(freq_samp.get())
+   ##################################  
         
-            if applynoise.get():
-                noiseenter=1
-                if dataorig:
-                    loaddataprev=copy.copy(loaddata)
-                loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
-            else:
-                try:    
-                    loaddata=copy.copy(loaddataprev) 
-                    dataorig=0
-                    noiseenter=0
-                except NameError:
-                    print("noise not yet applied")
-           
-            try:
-                fcc=float(freq_cut.get())
-                if applyfilt.get():
-                    if dataorig_f:
-                        loaddataprev=copy.copy(loaddata)  
-                    loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
-     
-                else:
-                    try:  
-                        if not(noiseenter):  
-                            loaddata=copy.copy(loaddataprev) 
-                            dataorig_f=0
-                    except NameError:
-                        print("filter not yet applied")   
-            except ValueError:
-                print("data fcut missing!")
-                     
+    if applynoise.get():
+        try:
+            fss=float(freq_samp.get()) 
+            noiseenter=1
+            if dataorig:
+                loaddataprev=copy.copy(loaddata)
+            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
         except ValueError:
-            print("data fsamp missing") 
+            print("data fsamp missing")
+    else:
+        try:  
+            if (not(filtenter) or noiseenter):
+                loaddata=copy.copy(loaddataprev) 
+                dataorig=0
+                noiseenter=0
+                filtenter=0
+        except NameError:
+            print("noise not yet applied") 
+    
+    if applyfilt.get():
+        try:
+            fss=float(freq_samp.get()) 
+            fcc=float(freq_cut.get())
+            filtenter=1
+            if dataorig_f:
+                    loaddataprev=copy.copy(loaddata)  
+            loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
             
+        except ValueError:
+            print("data fcut missing!")
+    else:
+        try:  
+            if not(noiseenter) :  
+                loaddata=copy.copy(loaddataprev) 
+                dataorig_f=0
+                filtenter=0
+        except NameError:
+            print("filter not yet applied")       
+        
     plotrefresh(pl4[0],pl4[1],loaddata[1])
     plotrefresh(pl5[0],pl5[1],loaddata[2])
     plotrefresh(pl6[0],pl6[1],loaddata[3])
@@ -347,6 +357,8 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
 
 
 
