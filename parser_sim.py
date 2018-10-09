@@ -11,9 +11,10 @@ from scipy import constants as consts
 # remember to change the x array for the new function
 
 const_dic = {
-    'x1' : None,
-    'x2' : None,
-    'x3' : None,
+    #'x1' : None,
+    #'x2' : None,
+    #'x3' : None,
+    'x' : None,
     'pi' : consts.pi,
     'e' : consts.e,
     'phi' : consts.golden,
@@ -28,23 +29,21 @@ def parse_function(equation):
 
     #for eq in equation:
     #    equation[eq] = adjust_equation(equation[eq])
-
+    func = list()
     equation  = [adjust_equation(i) for i in equation]
-    if all(v is None for v in x):
+    #if all(v is None for v in x):
+    if None == const_dic['x'].any():
         print("Error, unable to find x array")
         return -1
     # Now I have to create function array
     for i_eq in range(len(equation)):
 	    # I rename the key of the actual x in x so I'm sure that the program won't use others vars
-        const_dic['x'] = const_dic.pop('x' + str(i_eq+1))
-        func[i_eq] = ne.evaluate(equation[i_eq],const_dic)
-        const_dic['x' + str(i_eq+1)] = const_dic.pop('x')
+        #const_dic['x'] = const_dic.pop('x' + str(i_eq+1))
+        func.append(ne.evaluate(equation[i_eq],const_dic))
+        #const_dic['x' + str(i_eq+1)] = const_dic.pop('x')
 	    
-    # So if I want to calculate just one func I don't delete the other funcs
-    if len(equation)>1:
-        for i_dic in range(3):
-            const_dic['x' + str(i+1)] = None
-    
+    const_dic['x']=None
+  
     return func
 	
 def adjust_equation(eq):
@@ -59,16 +58,24 @@ def adjust_equation(eq):
 def parse_x(sampling_times, samples_num):
     # It accepts 3 sample times
     samples_num = int(samples_num)
-	
+    sampling_times = int(sampling_times)
     # Convert into int
-    sampling_times = list(map(int, sampling_times)) 
+    #sampling_times = list(map(int, sampling_times)) 
 	
-    x = [np.zeros(samples_num) for i in range(len(sampling_times))]
-    for i_time in sampling_times:
-        for i_num in range(samples_num):
-            x[i_num] = float(index*sampling_times[i_time])
-		    
-    for i in range(3):
-        const_dic['x' + str(i+1)] = x[i]
+	# Implementation for multiple sampling_times
+	#
+    #x = [np.zeros(samples_num) for i in range(len(sampling_times))]
+    #for i_time in sampling_times:
+    #    for i_num in range(samples_num):
+    #        x[i_num] = float(index*sampling_times[i_time])
+    #for i in range(3):
+    #    const_dic['x' + str(i+1)] = x[i]
+    
+    # Implementation for a single sample time
+    x = np.zeros(samples_num)
+    for i_num in range(samples_num):
+        x[i_num] = float(i_num*sampling_times)
+    const_dic['x'] = x 
+    
 	    
     return x

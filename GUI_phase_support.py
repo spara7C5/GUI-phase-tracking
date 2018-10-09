@@ -34,7 +34,9 @@ import codecs
 import copy
 import PSD
 import pathlib
-import configparser
+from configparser import ConfigParser
+from numpy import asarray as np_asarray
+
 
 try:
     from Tkinter import *
@@ -54,7 +56,7 @@ CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
 LAST_ENTRY_NAME = 'last_entry.ini'
 # End Config files
 
-last_entry_conf = configparser.ConfigParser()
+last_entry_conf = ConfigParser()
 func_read = []
 samples = int()
 
@@ -104,62 +106,32 @@ def set_Tk_var():
 
 
 
-def on_closing():
+def write_last():
     print('GUI_phase_support.on_closing')
     #sys.stdout.flush()
     
     # Let's create LAST_ENTRY_NAME file:
+    conf_parser_obj = last_entry_conf
     
     if not CONFIG_PATH.exists():
         CONFIG_PATH.mkdir()
         
     if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
-        create_last_entry()
-    update_last_entry()
+        create_last_entry(conf_parser_obj)
+    update_last_entry(conf_parser_obj)
     
-    destroy_window()
+    
 
-def create_last_entry():
 
-    
-    last_entry_conf.add_section('EQUATIONS')
-    last_entry_conf.add_section('SAMPLING_TIMES')
-    last_entry_conf.add_section('N_SAMPLING')
-
-def update_last_entry():
-    # Equations
-    for i_eq in func_read:
-        last_entry_conf.set('EQUATIONS','eq_' + str(i_eq+1), func_read[i])
-    # Sampling times
-        last_entry_conf.set('SAMPLING_TIMES', 'eq_' + str(i_eq+1), times_read[i])
-    # Number of sampling
-    last_entry_conf.set('N_SAMPLING', 'num', samples)
-    last_entry_conf.write(CONFIG_PATH / LAST_ENTRY_NAME)
-    
-def read_last_entry():
-    eq = list()
-    times = list()
-    
-    last_entry_conf.read(CONFIG_PATH / LAST_ENTRY_NAME)
-    # Equations
-    for i_eq in func_read:
-        eq.append(last_entry_conf.get('EQUATIONS','eq_' + str(i_eq+1), func_read[i]))
-        # Sampling times
-        times.append(last_entry_conf.get('SAMPLING_TIMES', 'eq_' + str(i_eq+1), times_read[i]))
-        # Number of sampling
-    num = last_entry_conf.get('N_SAMPLING', 'num', samples)
-    
-    # Now I'll fill the Entries
-    
-    return {'eq' : eq, 'times' : times, 'num' : num}   
 
 def LoadSim_pressed(p1):
     global w
     
     samples = int(point_num.get())
     
-    times_read = [st_de.get(), st_te.get(), st_ph.get()]
-    times_read = list(map(int, times_read)) 
+    #times_read = [st_de.get(), st_te.get(), st_ph.get()]
+    #times_read = list(map(int, times_read)) 
+    times_read = st_de.get()
     
     func_read = [eq_de.get(), eq_te.get(), eq_ph.get()]
     
@@ -173,8 +145,10 @@ def LoadSim_pressed(p1):
     last_x = parse_x(times_read,samples)
     last_func = parse_function(func_read)
 
-    plots=array(np.asarray(last_func))
+    plots=array(np_asarray(last_func))
     plotrefresh(pl1[0],pl1[1],plots)
+    
+    write_last()
 
 def Refresh_PSD(p1):
     global loaddata
@@ -270,7 +244,7 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
-    top.protocol('WM_DELETE_WINDOW',on_closing())
+    #top.wm_protocol('WM_DELETE_WINDOW',GUI_phase_support.on_closing())
     pl1=plotinit(w.Frame1)
     pl4=plotinit(w.Frame4)
     pl5=plotinit(w.Frame5)
@@ -281,14 +255,17 @@ def init(top, gui, *args, **kwargs):
     pl10=plotinit(w.Frame10)
     pl11=plotinit(w.Frame11)
     
-    on_load()
+    on_load(last_entry_conf)
     
-def on_load():
+def on_load(last_entry_conf):
 
     if (CONFIG_PATH / LAST_ENTRY_NAME).exists():
 
-        tmp_dic = read_last_entry()
+        tmp_dic = read_last_entry(last_entry_conf)
         # equations
+        print(last_entry_conf.sections())
+        print('ciawa')
+        
         eq_de.set(tmp_dic.get('eq')[0])
         eq_te.set(tmp_dic.get('eq')[1])
         eq_ph.set(tmp_dic.get('eq')[2])
@@ -335,7 +312,45 @@ def destroy_window():
     top_level.destroy()
     top_level = None
     
+def create_last_entry(conf_parser_obj):
 
+    
+    conf_parser_obj.add_section('EQUATIONS')
+    conf_parser_obj.add_section('SAMPLING_TIMES')
+    conf_parser_obj.add_section('N_SAMPLING')
+
+def update_last_entry(conf_parser_obj):
+    print(conf_parser_obj)
+    # Equations
+    for i_eq in func_read:
+        conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq+1), func_read[i])
+        
+    # Sampling times
+    conf_parser_obj.set('SAMPLING_TIMES', 'eq_' + str(i_eq+1), str(times_read))
+    # Number of sampling
+    conf_parser_obj.set('N_SAMPLING', 'num', str(samples))
+
+    with open(str(CONFIG_PATH / LAST_ENTRY_NAME), 'w') as lastfile:
+        conf_parser_obj.write(lastfile)
+    
+    
+def read_last_entry(conf_parser_obj):
+    eq = list()
+    times = list()
+    print('read_last_entry')
+    print(conf_parser_obj)
+    conf_parser_obj.read(CONFIG_PATH / LAST_ENTRY_NAME)
+    # Equations
+    for i_eq in func_read:
+        eq.append(conf_parser_obj.get('EQUATIONS','eq_' + str(i_eq+1)))
+        # Sampling times
+        times.append(conf_parser_obj.get('SAMPLING_TIMES', 'eq_' + str(i_eq+1)))
+        # Number of sampling
+    num = int(conf_parser_obj.get('N_SAMPLING', 'num'))
+    
+    # Now I'll fill the Entries
+    
+    return {'eq' : eq, 'times' : times, 'num' : num}   
 
 if __name__ == '__main__':
     import GUI_phase
