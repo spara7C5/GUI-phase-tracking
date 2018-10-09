@@ -24,6 +24,7 @@
 #    Oct 08, 2018 03:31:30 PM CEST  platform: Linux
 #    Oct 08, 2018 05:08:12 PM CEST  platform: Linux
 #    Oct 09, 2018 09:52:04 AM CEST  platform: Linux
+#    Oct 09, 2018 02:36:59 PM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -117,6 +118,12 @@ def set_Tk_var():
     global ck_rand_ph
     ck_rand_ph = IntVar(0)
     
+    global in_de
+    in_de = StringVar()
+    global in_te
+    in_te = StringVar()
+    global in_ph
+    in_ph = StringVar()
 
 def phipsd_pressed(p1):
     psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
@@ -128,14 +135,22 @@ def phipsd_pressed(p1):
     sys.stdout.flush()
 
 def psd_phi(p1):
-    fs=float(freq_samp.get())
+    if issim:
+        fs=1/float(st_de.get())
+    else :
+        fs=float(freq_samp.get())
+        
     psd13=PSD.plotpsd(phil,fs)
     plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1)
     
 def track_start(p1):
     global loaddata,phil
     check_track.set("Wait...")
-    dell,thel,phil=phase_sim.tracker(loaddata)
+    try :
+        startp=[float(in_de.get()),float(in_te.get()),float(in_ph.get())]
+        dell,thel,phil=phase_sim.tracker(loaddata,startp[0],startp[1],startp[2])
+    except ValueError :
+        dell,thel,phil=phase_sim.tracker(loaddata)
     tot=array([dell,thel,phil])
     plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"])
     check_track.set("Done...")
@@ -176,7 +191,10 @@ def LoadSim_pressed(p1):
     
 def Refresh_PSD(p1):
     global loaddata
-    fs=float(freq_samp.get())
+    if issim:
+        fs=1/float(st_de.get())
+    else :
+        fs=float(freq_samp.get())
     psd1=PSD.plotpsd(loaddata[1],fs)
     plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1)
     psd2=PSD.plotpsd(loaddata[2],fs)
@@ -188,7 +206,7 @@ def Refresh_PSD(p1):
 
 
 def LoadFile_pressed(e):
-    global w,loaddata,upload_check,data_dir_load
+    global w,loaddata,upload_check,data_dir_load,issim
     upload_check.set("Waiting...")
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
@@ -209,6 +227,13 @@ def LoadFile_pressed(e):
 def Refresh_pressed(p1):
     global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter,data_dir_load
     
+    if data_dir_load==1:
+        try:
+            loaddataprev=copy.copy(loaddata)
+        except NameError:
+            print("first data load")
+        data_dir_load=0
+        
     if data_dir_load==0:
     
         try: 
@@ -252,12 +277,6 @@ def Refresh_pressed(p1):
     plotrefresh(pl6[0],pl6[1],loaddata[3])
     plotrefresh(pl7[0],pl7[1],loaddata[4])
     
-    if data_dir_load==1:
-        try:
-            loaddataprev=copy.copy(loaddata)
-        except NameError:
-            print("first data load")
-        data_dir_load=0
 
 
 def Search_pressed(e):
@@ -328,6 +347,11 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
 
 
 

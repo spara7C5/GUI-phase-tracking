@@ -59,7 +59,7 @@ def downsampl(x,ns):
 	out5=signal.decimate(x[4], ns)
 	return out1,out2, out3,out4,out5
 
-def tracker(data):
+def tracker(data,din=1,tin=1,pin=1):
 	direct_plot_mode=0
 	phase_plot_mode=0
 	plot_details=1
@@ -120,7 +120,7 @@ def tracker(data):
 
 	#### fundamental variables ##########
 
-	B=array([[6],[2],[2.5]]) # Beta-point
+	B=array([[din],[tin],[pin]]) # Beta-point
 	deB=array([[0],[0],[0]]) # Beta-increment
 	Yt=array([[0],[0],[0],[0]]) # 4 values of the coherent receiver 
 	mod=1 # module of the Y vector
