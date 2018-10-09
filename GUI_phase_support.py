@@ -23,6 +23,7 @@
 #    Oct 08, 2018 01:57:02 PM CEST  platform: Linux
 #    Oct 08, 2018 03:31:30 PM CEST  platform: Linux
 #    Oct 08, 2018 05:08:12 PM CEST  platform: Linux
+#    Oct 09, 2018 09:52:04 AM CEST  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -102,15 +103,20 @@ def set_Tk_var():
     downsamp = IntVar(0)
     global num_down
     num_down = StringVar()
-
-
-
+    
     global rand_de
     rand_de = StringVar()
-    global che49
-    che49 = StringVar()
-    global che52
-    che52 = StringVar()
+    global ck_rand_de
+    ck_rand_de = IntVar(0)
+    global rand_te
+    rand_te = StringVar()
+    global ck_rand_te
+    ck_rand_te = IntVar(0)
+    global rand_ph
+    rand_ph = StringVar()
+    global ck_rand_ph
+    ck_rand_ph = IntVar(0)
+    
 
 def phipsd_pressed(p1):
     psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
@@ -147,14 +153,27 @@ def LoadSim_pressed(p1):
     f_te = parse_function(eq_te.get(), x_de)
     x_de= parse_x(st_de.get(), samples)
     f_ph = parse_function(eq_ph.get(), x_de)
-
-    plots=array([f_de,f_te,f_ph])
-    plotrefresh(pl1[0],pl1[1],plots,col=['r',"orange","green"])
-    loaddata=list(datagenerator.datagen(f_de,f_te,f_ph))
+    
+    fun_list=array([f_de,f_te,f_ph])
+    ck_list=[ck_rand_de.get(),ck_rand_te.get(),ck_rand_ph.get()]
+    pow_list=[rand_de.get(),rand_te.get(),rand_ph.get()]
+    myR=[]
+    
+    for n,i in enumerate(ck_list):
+        if i:
+           print("added noise")
+           myR=phase_sim.RandomWalk(float(pow_list[n]),1/float(st_de.get()))
+           myR.funrand(samples)
+           fun_list[n]+=myR.randarr
+           del myR
+          
+    f_ph=fun_list[2]        
+    plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"])
+    loaddata=list(datagenerator.datagen(fun_list[0],fun_list[1],fun_list[2]))
     loaddata.insert(0,zeros(samples))
     data_dir_load=1
     issim=1
-
+    
 def Refresh_PSD(p1):
     global loaddata
     fs=float(freq_samp.get())
@@ -309,6 +328,11 @@ def destroy_window():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
+
 
 
 
