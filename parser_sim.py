@@ -15,6 +15,7 @@ const_dic = {
     #'x2' : None,
     #'x3' : None,
     'x' : None,
+    '^' : '**',
     'pi' : consts.pi,
     'e' : consts.e,
     'phi' : consts.golden,

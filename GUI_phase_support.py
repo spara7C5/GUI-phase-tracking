@@ -131,9 +131,9 @@ def LoadSim_pressed(p1):
 
     plots=array(np_asarray(last_func))
     plotrefresh(pl1[0],pl1[1],plots)
-    '''
+    
     write_last(func_read,times_read,samples)
-    '''
+    
     
 def Refresh_PSD(p1):
     global loaddata
@@ -229,7 +229,6 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
-
     #top.wm_protocol('WM_DELETE_WINDOW',GUI_phase_support.on_closing())
     pl1=plotinit(w.Frame1)
     pl4=plotinit(w.Frame4)
@@ -297,11 +296,13 @@ def destroy_window():
  
  # Write functions
  
-'''
+
 def write_last(func_read,times_read,samples):
     print('GUI_phase_support.on_closing')
     #sys.stdout.flush()
+    print(func_read,times_read,samples)
     
+   
     # Let's create LAST_ENTRY_NAME file:
     conf_parser_obj = last_entry_conf
     
@@ -310,35 +311,34 @@ def write_last(func_read,times_read,samples):
         
     if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
         create_last_entry(conf_parser_obj)
+
     update_last_entry(conf_parser_obj,func_read,times_read,samples)
     
-'''       
 def create_last_entry(conf_parser_obj):
 
     
     conf_parser_obj.add_section('EQUATIONS')
     conf_parser_obj.add_section('SAMPLING_TIMES')
     conf_parser_obj.add_section('N_SAMPLING')
-'''
+
 def update_last_entry(conf_parser_obj,func_read,times_read,samples):
-    print(conf_parser_obj)
+    print('toupdate')
     # Equations
-    i_eq_up = 0
-    print(func_read)
-    print(type(func_read[0])
-    #for i_eq_up in func_read:
-    #    conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq_up+1), str(func_read[i]))
+    
+    for i_eq_up in range(len(func_read)):
+        conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq_up+1), func_read[i_eq_up])
         
     # Sampling times
-    #conf_parser_obj.set('SAMPLING_TIMES', 'times', str(times_read))
+    conf_parser_obj.set('SAMPLING_TIMES', 'times', str(times_read))
     # Number of sampling
-    #conf_parser_obj.set('N_SAMPLING', 'num', str(samples))
+    conf_parser_obj.set('N_SAMPLING', 'num', str(samples))
 
-    #with open(str(CONFIG_PATH / LAST_ENTRY_NAME), 'w') as lastfile:
-    #    conf_parser_obj.write(lastfile)
-'''    
+    with open(str(CONFIG_PATH / LAST_ENTRY_NAME), 'w') as lastfile:
+        conf_parser_obj.write(lastfile)
 
 # Read functions
+
+
 def read_last_entry(conf_parser_obj):
     eq = []
     times = []
@@ -356,8 +356,7 @@ def read_last_entry(conf_parser_obj):
     
     # Now I'll fill the Entries
     read_val = merge_arrays([eq,times,num])
-    print('read_val')
-    print(read_val)
+    
     return read_val
        
 def merge_arrays (list_of_lists):
