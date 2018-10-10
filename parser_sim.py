@@ -58,7 +58,7 @@ def adjust_equation(eq):
 def parse_x(sampling_times, samples_num):
     # It accepts 3 sample times
     samples_num = int(samples_num)
-    sampling_times = int(sampling_times)
+    sampling_times = float(sampling_times)
     # Convert into int
     #sampling_times = list(map(int, sampling_times)) 
 	
