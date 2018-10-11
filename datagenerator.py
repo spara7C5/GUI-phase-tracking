@@ -1,6 +1,6 @@
 
 ############# SIMULATOR OF THE COHERENT RECEIVER CHANNELS ############
-####         main function input: 3 functions, 4 bools                    
+####         main function input: 3 functions, 4 bools
 #### 			   output: 4-channels data file, parameters plot,
 ####				   parameters file (if activated)
 ####				   poincare' sphere (if activated)
@@ -26,9 +26,9 @@ def fibmod(delta,theta,phi):
 
 def datagen(dearr,thearr,phiarr):
 
-	
+
 	t,rex,imx,rey,imy=[],[],[],[],[]
-	
+
 	for i in arange(len(dearr)):
 		dd=dearr[i]
 		tt=thearr[i]
@@ -44,11 +44,7 @@ def datagen(dearr,thearr,phiarr):
 		imx.append(Exi)
 		rey.append(Eyr)
 		imy.append(Eyi)
-		
-	#the order of the output is the same of the 
-	#experimental setup real-imag-imag-real	
+
+	#the order of the output is the same of the
+	#experimental setup real-imag-imag-real
 	return array(rex), array(imx), array(imy), array(rey)
-
-
-
-

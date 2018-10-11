@@ -126,6 +126,8 @@ def set_Tk_var():
     in_te = StringVar()
     global in_ph
     in_ph = StringVar()
+    
+    
 
 def phipsd_pressed(p1):
     psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
@@ -137,11 +139,8 @@ def phipsd_pressed(p1):
     sys.stdout.flush()
 
 def psd_phi(p1):
-    if issim:
-        fs=1/float(st_de.get())
-    else :
-        fs=float(freq_samp.get())
-        
+    
+    fs=get_freq()
     psd13=PSD.plotpsd(phil,fs)
     plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1)
     
@@ -188,16 +187,17 @@ def LoadSim_pressed(p1):
     plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"])
     loaddata=list(datagenerator.datagen(fun_list[0],fun_list[1],fun_list[2]))
     loaddata.insert(0,zeros(samples))
+    loadata=array(loaddata)
     data_dir_load=1
     issim=1
     
 def Refresh_PSD(p1):
     global loaddata
-    if issim:
-        fs=1/float(st_de.get())
-    else :
-        fs=float(freq_samp.get())
+    
+    fs=get_freq()
     psd1=PSD.plotpsd(loaddata[1],fs)
+    print(len(psd1[0]))
+    print(len(psd1[1]))
     plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1)
     psd2=PSD.plotpsd(loaddata[2],fs)
     plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1)
@@ -245,11 +245,11 @@ def Refresh_pressed(p1):
         
     if applynoise.get():
         try:
-            fss=float(freq_samp.get()) 
+            fss=get_freq()
             noiseenter=1
             if dataorig:
                 loaddataprev=copy.copy(loaddata)
-            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),float(freq_samp.get()))
+            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),fss)
         except ValueError:
             print("data fsamp missing")
     else:
@@ -264,12 +264,17 @@ def Refresh_pressed(p1):
     
     if applyfilt.get():
         try:
-            fss=float(freq_samp.get()) 
+            fss=get_freq()
+            print("1")
             fcc=float(freq_cut.get())
+            print("2")
             filtenter=1
+            print("3")
             if dataorig_f:
+                    print("4")
                     loaddataprev=copy.copy(loaddata)  
             loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
+            print("5")
             
         except ValueError:
             print("data fcut missing!")
@@ -329,19 +334,21 @@ def plotinit(framename):
     
 def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b'):
     ax.clear()
-    try:
+    try: #check for y
         ax.plot(x,y)
-    except ValueError:
+    except ValueError: #check for multiple x
         if len(x.shape)>1:
-            for n,i in enumerate(x):
+            for n,i in enumerate(x): #multicolor plot
                 ax.plot(i,col[n])
         else:
             ax.plot(x,color=col)
     if logactive:
+        ax.grid()
         ax.loglog()
     #xax=ax.get_xaxis().get_major_formatter()
         #xax.set_powerlimits((1,6))
         #xax.set_scientific(True)
+    ax.grid()
     canvasobj.draw()
        
 def destroy_window():
@@ -352,11 +359,23 @@ def destroy_window():
     top_level.destroy()
     top_level = None
     
+def get_freq():
 
-
+    if issim:
+        fs=1/float(st_de.get())
+    else :
+        try:
+            fs=float(freq_samp.get())/int(num_down.get())
+        except ValueError: 
+            fs=float(freq_samp.get()) 
+    return fs
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+
+
 
 
 

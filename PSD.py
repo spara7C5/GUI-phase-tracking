@@ -19,10 +19,10 @@ def plotpsd(Sin,fs):
 	if mirroring:
 		S=pad(S,(0,len(S)),'symmetric')
 
-	
-	Ys = fft(S,len(S)) #length is half of data-length
+
+	Ys = fft(S,int(N)) #length is half of data-length
 	Ysmod=2*((abs(Ys)**2)/(Fs*N**1))
-	fvec=(arange(len(S)))*(Fs/len(S)) 
+	fvec=(arange(len(S)))*(Fs/len(S))
 	#ax2.plot(fvec[0:int(N/2)],(Ysmod)[0:int(N/2)])
 	#xax=ax2.get_xaxis().get_major_formatter()
 	#xax.set_powerlimits((1,6))
@@ -32,6 +32,4 @@ def plotpsd(Sin,fs):
 	#print(mean(Ysmod[1:int(N/2)]))
 	#ax2.semilogy()
 	#ax2.loglog()
-	return fvec,Ysmod
-
-
+	return fvec[0:int(N/2)],(Ysmod)[0:int(N/2)]
