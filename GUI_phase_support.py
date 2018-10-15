@@ -41,6 +41,10 @@ import codecs
 import copy
 import PSD
 import datagenerator
+import pathlib
+from configparser import ConfigParser
+from numpy import asarray as np_asarray
+
 
 try:
     from Tkinter import *
@@ -53,6 +57,16 @@ try:
 except ImportError:
     import tkinter.ttk as ttk
     py3 = True
+
+
+# Config files:
+CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
+LAST_ENTRY_NAME = 'last_entry.ini'
+# End Config files
+
+last_entry_conf = ConfigParser()
+func_read = []
+samples = int()
 
 def set_Tk_var():
     global contEntry1,filename
@@ -165,11 +179,13 @@ def LoadSim_pressed(p1):
 
     parse_x(st_de.get(), samples)
     f_de = parse_function(eq_de.get())
-    #x_de= parse_x(st_de.get(), samples)
+    #parse_x(st_de.get(), samples)
     f_te = parse_function(eq_te.get())
-    #x_de= parse_x(st_de.get(), samples)
+    #parse_x(st_de.get(), samples)
     f_ph = parse_function(eq_ph.get())
 
+    times_read=st_de.get()
+    #fun_list=array([f_de[0],f_te[0],f_ph[0]])
     fun_list=array([f_de,f_te,f_ph])
     ck_list=[ck_rand_de.get(),ck_rand_te.get(),ck_rand_ph.get()]
     pow_list=[rand_de.get(),rand_te.get(),rand_ph.get()]
@@ -183,6 +199,19 @@ def LoadSim_pressed(p1):
            fun_list[n]+=myR.randarr
            del myR
 
+    func_read = [eq_de.get(), eq_te.get(), eq_ph.get()]
+
+    #x_de = parse_x(st_de.get(), samples)
+    #f_de = parse_function(eq_de.get(), x_de)
+    #x_de= parse_x(st_de.get(), samples)
+    #f_te = parse_function(eq_te.get(), x_de)
+    #x_de= parse_x(st_de.get(), samples)
+    #f_ph = parse_function(eq_ph.get(), x_de)
+
+    last_x = parse_x(times_read,samples)
+    last_func =[ parse_function(ff) for ff in func_read]
+
+    plots=array(np_asarray(last_func))
     f_ph=fun_list[2]
     plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"],ylab="del,the,phi (rad)")
     loaddata=list(datagenerator.datagen(fun_list[0],fun_list[1],fun_list[2]))
@@ -190,6 +219,9 @@ def LoadSim_pressed(p1):
     loadata=array(loaddata)
     data_dir_load=1
     issim=1
+
+    write_last(func_read,times_read,samples)
+
 
 def Refresh_PSD(p1):
 
@@ -313,6 +345,7 @@ def init(top, gui, *args, **kwargs):
     w = gui
     top_level = top
     root = top
+    #top.wm_protocol('WM_DELETE_WINDOW',GUI_phase_support.on_closing())
     pl1=plotinit(w.Frame1)
     pl4=plotinit(w.Frame4)
     pl5=plotinit(w.Frame5)
@@ -325,6 +358,24 @@ def init(top, gui, *args, **kwargs):
     pl12=plotinit(w.Frame12)
     pl13=plotinit(w.Frame13)
     pl14=plotinit(w.Frame14)
+    on_load(last_entry_conf)
+
+
+def on_load(last_entry_conf):
+    if (CONFIG_PATH / LAST_ENTRY_NAME).exists():
+
+        readed = read_last_entry(last_entry_conf)
+        # equations
+
+
+        eq_de.set(readed[0])
+        eq_te.set(readed[1])
+        eq_ph.set(readed[2])
+        # Sampling times
+        st_de.set(readed[3])
+        # Sample number
+        point_num.set(readed[4])
+
 
 def plotinit(framename):
     global w
@@ -368,8 +419,83 @@ def destroy_window():
     top_level.destroy()
     top_level = None
 
-def get_freq():
+ # Write functions
 
+
+def write_last(func_read,times_read,samples):
+    print('GUI_phase_support.on_closing')
+    #sys.stdout.flush()
+    print(func_read,times_read,samples)
+
+
+    # Let's create LAST_ENTRY_NAME file:
+    conf_parser_obj = last_entry_conf
+
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.mkdir()
+
+    if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
+        create_last_entry(conf_parser_obj)
+
+    update_last_entry(conf_parser_obj,func_read,times_read,samples)
+
+def create_last_entry(conf_parser_obj):
+
+
+    conf_parser_obj.add_section('EQUATIONS')
+    conf_parser_obj.add_section('SAMPLING_TIMES')
+    conf_parser_obj.add_section('N_SAMPLING')
+
+def update_last_entry(conf_parser_obj,func_read,times_read,samples):
+    print('toupdate')
+    # Equations
+
+    for i_eq_up in range(len(func_read)):
+        conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq_up+1), func_read[i_eq_up])
+
+    # Sampling times
+    conf_parser_obj.set('SAMPLING_TIMES', 'times', str(times_read))
+    # Number of sampling
+    conf_parser_obj.set('N_SAMPLING', 'num', str(samples))
+
+    with open(str(CONFIG_PATH / LAST_ENTRY_NAME), 'w') as lastfile:
+        conf_parser_obj.write(lastfile)
+
+# Read functions
+
+
+def read_last_entry(conf_parser_obj):
+    eq = []
+    times = []
+
+    conf_parser_obj.read(CONFIG_PATH / LAST_ENTRY_NAME)
+    #print(conf_parser_obj.sections())
+
+    # Equations
+    for i_eq_read in range(3):
+        eq.append(conf_parser_obj.get('EQUATIONS','eq_' + str(i_eq_read+1)))
+    # Sampling times
+    times.append(conf_parser_obj.get('SAMPLING_TIMES', 'times'))
+    # Number of sampling
+    num = conf_parser_obj.get('N_SAMPLING', 'num')
+
+    # Now I'll fill the Entries
+    read_val = merge_arrays([eq,times,num])
+
+    return read_val
+
+def merge_arrays (list_of_lists):
+    tmp_list = []
+    for i_list in range(len(list_of_lists)):
+        if  list == type(list_of_lists[i_list]):
+            for el_sublist in range(len(list_of_lists[i_list])):
+                tmp_list.append(list_of_lists[i_list][el_sublist])
+        else:
+            tmp_list.append(list_of_lists[i_list])
+    return tmp_list
+
+
+def get_freq():
     if issim:
         fs=1/float(st_de.get())
     else :
@@ -378,6 +504,8 @@ def get_freq():
         except ValueError:
             fs=float(freq_samp.get())
     return fs
+
+    
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()

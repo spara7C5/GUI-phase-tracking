@@ -70,6 +70,7 @@ class PHASE_TRACKING_GUI:
         top.geometry("1139x700+153+0")
         top.title("PHASE TRACKING GUI")
         top.configure(highlightcolor="black")
+        #top.protocol('WM_DELETE_WINDOW',GUI_phase_support.on_closing())
 
 
 
