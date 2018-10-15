@@ -1,7 +1,8 @@
 # GUI-phase-tracking
 
 ## What is it? 
-GUI-phase-tracking is a software useful for plotting mathematical functions and other stuffs.
+GUI-phase-tracking is a Graphical User Interface Software for the investigation of the polarization insensitive phase recovery algorithm presented in the dedicated repository in the home.
+
 
 ## Getting Started
 
