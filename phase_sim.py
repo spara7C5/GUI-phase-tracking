@@ -23,7 +23,7 @@ def loader(name,num,delim):
 
 
 def lowfilter(data,fc,fs=2.5*10**6):
-	b,a=signal.butter(4, fc/(fs/2), 'low')	
+	b,a=signal.butter(4, fc/(fs/2), 'low')
 	out1=signal.filtfilt(b, a, data[0])
 	out2=signal.filtfilt(b, a, data[1])
 	out3=signal.filtfilt(b, a, data[2])
@@ -47,7 +47,7 @@ def downconvert(x,flo):
 	lo=cos(2*pi*flo*x[0])
 	out1=x[1]*lo
 	out2=x[2]*lo
-	out3=x[3]*lo	
+	out3=x[3]*lo
 	out4=x[4]*lo
 	return out1,out2,out3,out4
 
@@ -59,6 +59,8 @@ def downsampl(x,ns):
 	out5=signal.decimate(x[4], ns)
 	return out1,out2, out3,out4,out5
 
+
+
 def tracker(data,din=1,tin=1,pin=1):
 	direct_plot_mode=0
 	phase_plot_mode=0
@@ -66,14 +68,14 @@ def tracker(data,din=1,tin=1,pin=1):
 	residual_plot=1
 	#noiseactive=0
 	#filteractive=0
-	
+
 	rex,imx,rey,imy=[],[],[],[]
 
 	rex=data[1]
 	imx=data[2]
 	imy=data[3]
 	rey=data[4]
-	
+
 
 
 	########################################
@@ -122,9 +124,9 @@ def tracker(data,din=1,tin=1,pin=1):
 
 	B=array([[din],[tin],[pin]]) # Beta-point
 	deB=array([[0],[0],[0]]) # Beta-increment
-	Yt=array([[0],[0],[0],[0]]) # 4 values of the coherent receiver 
+	Yt=array([[0],[0],[0],[0]]) # 4 values of the coherent receiver
 	mod=1 # module of the Y vector
-	deY=array([[0],[0],[0],[0]]) 
+	deY=array([[0],[0],[0],[0]])
 	B1=[] # auxiliary list
 	B2=[] # auxiliary list
 	B3=[] # auxiliary list
@@ -154,27 +156,27 @@ def tracker(data,din=1,tin=1,pin=1):
 	def modx(x):
 		b=sqrt(rex[x]**2 + imx[x]**2 + rey[x]**2 + imy[x]**2)
 		return b
-	###################################################	
+	###################################################
 
 	######### loop section ###############
 
 	print ("start loop")
 	t1=time.time()
 
-	
+
 	for i in range(len(rex)):
 
-		
-		
+
+
 		mod= modx(i)
 		deY=(myY(i)/mod)-Yt
-		
+
 
 		Wn=Wt(B[0,0],B[1,0],B[2,0])
 		u=Prodv(B[0,0],B[1,0],B[2,0])
 		d=linalg.det(u)
 		detl.append(1/d)
-		
+
 
 		uu=inv(u)
 		#sigd=sig_noise*uu[0,0]
@@ -183,8 +185,8 @@ def tracker(data,din=1,tin=1,pin=1):
 		deB=uu.dot(Wn).dot(deY)
 		#print(sigt)
 		B=B+deB
-		
-		
+
+
 
 		B1=B[0,0]
 		B2=B[1,0]
@@ -197,10 +199,10 @@ def tracker(data,din=1,tin=1,pin=1):
 		#sigdel.append(sigd)
 		#sigthe.append(sigt)
 		#sigphi.append(sigp)
-		
+
 		Yt=Fun(B1,B2,B3)
-		
-		
+
+
 	print("loop finished")
 	print("elapsed time: ",time.time()-t1)
 	###########################################
@@ -214,10 +216,23 @@ def tracker(data,din=1,tin=1,pin=1):
 
 	return array(dell),array(thel),array(phil)
 
-	
+
 
 ########################################################################
 
+
+def normalize(x1,x2,x3,x4):
+# new variables are created in order to leave the input data unchanged
+	l=len(x1)
+	o1=o2=o3=o4=empty(l,dtype=float)
+	for i in range(l):
+		mod=sqrt(x1[i]**2 + x2[i]**2 + x3[i]**2 + x4[i]**2)
+		o1[i]=x1[i]/mod
+		o2[i]=x2[i]/mod
+		o3[i]=x3[i]/mod
+		o4[i]=x4[i]/mod
+
+	return o1,o2,o3,o4
 
 import numpy.random as npr
 
@@ -228,31 +243,12 @@ class RandomWalk:
 	def __init__(self, pow1hz,fs):
 		self.last=0
 		self.randlis=[]
-		self.ampli=sqrt(2*pi*pi*pow1hz/fs)		
-	
+		self.ampli=sqrt(2*pi*pi*pow1hz/fs)
+
 	def funrand(self,t):
 		for i in range(t):
 			step = npr.normal(0,1)
 			self.last+= step #+ (10**(-5))*npr.normal())
-			self.randlis.append(self.last)	
+			self.randlis.append(self.last)
 		self.randarr=array(self.randlis)
 		self.randarr*=self.ampli
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

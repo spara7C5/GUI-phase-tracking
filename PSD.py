@@ -32,4 +32,4 @@ def plotpsd(Sin,fs):
 	#print(mean(Ysmod[1:int(N/2)]))
 	#ax2.semilogy()
 	#ax2.loglog()
-	return fvec[0:int(N/2)],(Ysmod)[0:int(N/2)]
+	return fvec[1:int(N/2)],(Ysmod)[1:int(N/2)]

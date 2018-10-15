@@ -99,14 +99,14 @@ def set_Tk_var():
     lo_mix = IntVar(0)
     global freq_lo
     freq_lo = StringVar()
-    
+
     global check_track
     check_track = StringVar()
     global downsamp
     downsamp = IntVar(0)
     global num_down
     num_down = StringVar()
-    
+
     global rand_de
     rand_de = StringVar()
     global ck_rand_de
@@ -119,15 +119,15 @@ def set_Tk_var():
     rand_ph = StringVar()
     global ck_rand_ph
     ck_rand_ph = IntVar(0)
-    
+
     global in_de
     in_de = StringVar()
     global in_te
     in_te = StringVar()
     global in_ph
     in_ph = StringVar()
-    
-    
+
+
 
 def phipsd_pressed(p1):
     psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
@@ -139,11 +139,11 @@ def phipsd_pressed(p1):
     sys.stdout.flush()
 
 def psd_phi(p1):
-    
+
     fs=get_freq()
     psd13=PSD.plotpsd(phil,fs)
-    plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1)
-    
+    plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1,ylab="PSD(rad^2/Hz)")
+
 def track_start(p1):
     global loaddata,phil
     check_track.set("Wait...")
@@ -153,28 +153,28 @@ def track_start(p1):
     except ValueError :
         dell,thel,phil=phase_sim.tracker(loaddata)
     tot=array([dell,thel,phil])
-    plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"])
+    plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"],ylab="phase (rad)")
     check_track.set("Done...")
     if issim:
-        plotrefresh(pl14[0],pl14[1],phil-f_ph,col="green")
-    
+        plotrefresh(pl14[0],pl14[1],phil-f_ph,col="green",ylab="residual (rad)")
+
 def LoadSim_pressed(p1):
     global w,loaddata,data_dir_load,issim,f_ph
-    
+
     samples = int(point_num.get())
-    
+
     parse_x(st_de.get(), samples)
     f_de = parse_function(eq_de.get())
     #x_de= parse_x(st_de.get(), samples)
     f_te = parse_function(eq_te.get())
     #x_de= parse_x(st_de.get(), samples)
     f_ph = parse_function(eq_ph.get())
-    
+
     fun_list=array([f_de,f_te,f_ph])
     ck_list=[ck_rand_de.get(),ck_rand_te.get(),ck_rand_ph.get()]
     pow_list=[rand_de.get(),rand_te.get(),rand_ph.get()]
     myR=[]
-    
+
     for n,i in enumerate(ck_list):
         if i:
            print("added noise")
@@ -182,29 +182,34 @@ def LoadSim_pressed(p1):
            myR.funrand(samples)
            fun_list[n]+=myR.randarr
            del myR
-          
-    f_ph=fun_list[2]        
-    plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"])
+
+    f_ph=fun_list[2]
+    plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"],ylab="del,the,phi (rad)")
     loaddata=list(datagenerator.datagen(fun_list[0],fun_list[1],fun_list[2]))
     loaddata.insert(0,zeros(samples))
     loadata=array(loaddata)
     data_dir_load=1
     issim=1
-    
+
 def Refresh_PSD(p1):
-    global loaddata
-    
+
+
+    loadpsd=empty_like(loaddata,dtype=float)
+    if issim==0:
+        loadpsd[1:5]=phase_sim.normalize(loaddata[1],loaddata[2],loaddata[3],loaddata[4])
+    else:
+        loadpsd=loaddata
     fs=get_freq()
-    psd1=PSD.plotpsd(loaddata[1],fs)
+    psd1=PSD.plotpsd(loadpsd[1],fs)
     print(len(psd1[0]))
     print(len(psd1[1]))
-    plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1)
-    psd2=PSD.plotpsd(loaddata[2],fs)
-    plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1)
-    psd3=PSD.plotpsd(loaddata[3],fs)
-    plotrefresh(pl10[0],pl10[1],psd3[0],psd3[1],1)
-    psd4=PSD.plotpsd(loaddata[4],fs)
-    plotrefresh(pl11[0],pl11[1],psd4[0],psd4[1],1)
+    plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1,ylab="PSD(rad^2/Hz)")
+    psd2=PSD.plotpsd(loadpsd[2],fs)
+    plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1,ylab="PSD(rad^2/Hz)")
+    psd3=PSD.plotpsd(loadpsd[3],fs)
+    plotrefresh(pl10[0],pl10[1],psd3[0],psd3[1],1,ylab="PSD(rad^2/Hz)")
+    psd4=PSD.plotpsd(loadpsd[4],fs)
+    plotrefresh(pl11[0],pl11[1],psd4[0],psd4[1],1,ylab="PSD(rad^2/Hz)")
 
 
 def LoadFile_pressed(e):
@@ -213,8 +218,8 @@ def LoadFile_pressed(e):
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
     loaddata=array(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
-    
-    
+
+
     if lo_mix.get():
         loaddata[1:5]=phase_sim.downconvert(loaddata,float(freq_lo.get()))
     if downsamp.get():
@@ -223,7 +228,7 @@ def LoadFile_pressed(e):
     issim=0
     upload_check.set("Done!")
 
-    
+
 
 #    idea of the refresh button:
 # the action  (filter and/or noise) is always applied to the data currently displayed
@@ -233,16 +238,16 @@ def LoadFile_pressed(e):
 
 def Refresh_pressed(p1):
     global loaddata,loaddataprev,dataorig,dataorig_f,noiseenter,filtenter,data_dir_load
-    
+
     if data_dir_load==1:
         try:
             loaddataprev=copy.copy(loaddata)
         except NameError:
             print("first data load")
         data_dir_load=0
-        
-   ##################################  
-        
+
+   ##################################
+
     if applynoise.get():
         try:
             fss=get_freq()
@@ -253,15 +258,15 @@ def Refresh_pressed(p1):
         except ValueError:
             print("data fsamp missing")
     else:
-        try:  
+        try:
             if (not(filtenter) or noiseenter):
-                loaddata=copy.copy(loaddataprev) 
+                loaddata=copy.copy(loaddataprev)
                 dataorig=0
                 noiseenter=0
                 filtenter=0
         except NameError:
-            print("noise not yet applied") 
-    
+            print("noise not yet applied")
+
     if applyfilt.get():
         try:
             fss=get_freq()
@@ -272,26 +277,26 @@ def Refresh_pressed(p1):
             print("3")
             if dataorig_f:
                     print("4")
-                    loaddataprev=copy.copy(loaddata)  
+                    loaddataprev=copy.copy(loaddata)
             loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
             print("5")
-            
+
         except ValueError:
             print("data fcut missing!")
     else:
-        try:  
-            if not(noiseenter) :  
-                loaddata=copy.copy(loaddataprev) 
+        try:
+            if not(noiseenter) :
+                loaddata=copy.copy(loaddataprev)
                 dataorig_f=0
                 filtenter=0
         except NameError:
-            print("filter not yet applied")       
-        
-    plotrefresh(pl4[0],pl4[1],loaddata[1])
-    plotrefresh(pl5[0],pl5[1],loaddata[2])
-    plotrefresh(pl6[0],pl6[1],loaddata[3])
-    plotrefresh(pl7[0],pl7[1],loaddata[4])
-    
+            print("filter not yet applied")
+
+    plotrefresh(pl4[0],pl4[1],loaddata[1],ylab="ch1 (V)")
+    plotrefresh(pl5[0],pl5[1],loaddata[2],ylab="ch2 (V)")
+    plotrefresh(pl6[0],pl6[1],loaddata[3],ylab="ch3 (V)")
+    plotrefresh(pl7[0],pl7[1],loaddata[4],ylab="ch4 (V)")
+
 
 
 def Search_pressed(e):
@@ -300,7 +305,7 @@ def Search_pressed(e):
     filename.set(name)
     w.Text1.insert(END,filename.get())
     sys.stdout.flush()
-    
+
 
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
@@ -324,15 +329,15 @@ def init(top, gui, *args, **kwargs):
 def plotinit(framename):
     global w
     f1=framename
-    f= Figure(figsize=(6, 4), dpi=100)  
+    f= Figure(figsize=(6, 4), dpi=100)
     ax1= f.add_subplot(111)
     canvas= FCTkAgg(f, f1)
     toolbar = NavigationToolbar2Tk(canvas, f1 )
     toolbar.pack()
     canvas.get_tk_widget().pack()
     return ax1, canvas
-    
-def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b'):
+
+def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b',ylab="xxx"):
     ax.clear()
     try: #check for y
         ax.plot(x,y)
@@ -343,22 +348,26 @@ def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b'):
         else:
             ax.plot(x,color=col)
     if logactive:
-        ax.grid()
+        locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12)
+        ax.xaxis.set_major_locator(locmaj)
+        #locmin = matplotlib.ticker.LogLocator(base=10,subs=(0.2,0.4,0.6,0.8),numticks=12)
+        #ax.xaxis.set_minor_locator(locmin)
+        #ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+        #ax.grid(True,which='both',ls="-")
         ax.loglog()
-    #xax=ax.get_xaxis().get_major_formatter()
-        #xax.set_powerlimits((1,6))
-        #xax.set_scientific(True)
+
     ax.grid()
+    ax.set_ylabel(ylab)
     canvasobj.draw()
-       
+
 def destroy_window():
     # Function which closes the window.
     global top_level
-    
+
     print("exiting")
     top_level.destroy()
     top_level = None
-    
+
 def get_freq():
 
     if issim:
@@ -366,122 +375,9 @@ def get_freq():
     else :
         try:
             fs=float(freq_samp.get())/int(num_down.get())
-        except ValueError: 
-            fs=float(freq_samp.get()) 
+        except ValueError:
+            fs=float(freq_samp.get())
     return fs
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
