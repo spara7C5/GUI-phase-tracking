@@ -31,7 +31,8 @@ def parse_function(equation):
     #for n,eq in enumerate(equation):
     #    equation[n] = adjust_equation(equation[n])
     func = list()
-    #equation  = [adjust_equation(i) for i in equation]
+    equation = adjust_equation(equation)
+    print(equation)
     #if all(v is None for v in x):
     #if None == const_dic['x'].any():
     #    print("Error, unable to find x array")
@@ -43,6 +44,7 @@ def parse_function(equation):
         #const_dic['x'] = const_dic.pop('x' + str(i_eq+1))
         #func.append(ne.evaluate(equation[n],const_dic))
         #const_dic['x' + str(i_eq+1)] = const_dic.pop('x')
+    #for current_eq in 
     func=ne.evaluate(equation,const_dic)
     #const_dic['x']=None
 
