@@ -148,7 +148,14 @@ def phipsd_pressed(p1):
     f=figure()
     ax=f.add_subplot(111)
     ax.plot(psd00[0],psd00[1])
+    locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12)
+    ax.xaxis.set_major_locator(locmaj)
     ax.loglog()
+    ax.grid()
+    ax.set_ylabel("Phase PSD (V^2/Hz)")
+    ax.set_xlabel("freqeuncy (Hz)")
+    f.show()
+    sys.stdout.flush()
     f.show()
     sys.stdout.flush()
 
@@ -156,7 +163,8 @@ def psd_phi(p1):
 
     fs=get_freq()
     psd13=PSD.plotpsd(phil,fs)
-    plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1,ylab="PSD(rad^2/Hz)")
+    plotrefresh(pl13[0],pl13[1],psd13[0],psd13[1],1,ylab="PSD(rad^2/Hz)",xlab="frequency (Hz)")
+    sys.stdout.flush()
 
 def track_start(p1):
     global loaddata,phil
@@ -194,19 +202,13 @@ def LoadSim_pressed(p1):
     for n,i in enumerate(ck_list):
         if i:
            print("added noise")
-           myR=phase_sim.RandomWalk(float(pow_list[n]),1/float(st_de.get()))
+           myR=datagenerator.RandomWalk(float(pow_list[n]),1/float(st_de.get()))
            myR.funrand(samples)
            fun_list[n]+=myR.randarr
            del myR
 
     func_read = [eq_de.get(), eq_te.get(), eq_ph.get()]
 
-    #x_de = parse_x(st_de.get(), samples)
-    #f_de = parse_function(eq_de.get(), x_de)
-    #x_de= parse_x(st_de.get(), samples)
-    #f_te = parse_function(eq_te.get(), x_de)
-    #x_de= parse_x(st_de.get(), samples)
-    #f_ph = parse_function(eq_ph.get(), x_de)
 
     last_x = parse_x(times_read,samples)
     last_func =[ parse_function(ff) for ff in func_read]
@@ -235,13 +237,13 @@ def Refresh_PSD(p1):
     psd1=PSD.plotpsd(loadpsd[1],fs)
     print(len(psd1[0]))
     print(len(psd1[1]))
-    plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1,ylab="PSD(rad^2/Hz)")
+    plotrefresh(pl8[0],pl8[1],psd1[0],psd1[1],1,ylab="PSD(rad^2/Hz)",xlab="frequency (Hz)")
     psd2=PSD.plotpsd(loadpsd[2],fs)
-    plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1,ylab="PSD(rad^2/Hz)")
+    plotrefresh(pl9[0],pl9[1],psd2[0],psd2[1],1,ylab="PSD(rad^2/Hz)",xlab="frequency (Hz)")
     psd3=PSD.plotpsd(loadpsd[3],fs)
-    plotrefresh(pl10[0],pl10[1],psd3[0],psd3[1],1,ylab="PSD(rad^2/Hz)")
+    plotrefresh(pl10[0],pl10[1],psd3[0],psd3[1],1,ylab="PSD(rad^2/Hz)",xlab="frequency (Hz)")
     psd4=PSD.plotpsd(loadpsd[4],fs)
-    plotrefresh(pl11[0],pl11[1],psd4[0],psd4[1],1,ylab="PSD(rad^2/Hz)")
+    plotrefresh(pl11[0],pl11[1],psd4[0],psd4[1],1,ylab="PSD(rad^2/Hz)",xlab="frequency (Hz)")
 
 
 def LoadFile_pressed(e):
@@ -346,17 +348,21 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
     #top.wm_protocol('WM_DELETE_WINDOW',GUI_phase_support.on_closing())
+    #params plot
     pl1=plotinit(w.Frame1)
+    #channels plots
     pl4=plotinit(w.Frame4)
     pl5=plotinit(w.Frame5)
     pl6=plotinit(w.Frame6)
     pl7=plotinit(w.Frame7)
-    pl8=plotinit(w.Frame8)
-    pl9=plotinit(w.Frame9)
-    pl10=plotinit(w.Frame10)
-    pl11=plotinit(w.Frame11)
+    #psd plots
+    pl8=plotinit(w.Frame8,[0.15,0.2,0.75,0.75])
+    pl9=plotinit(w.Frame9,[0.15,0.2,0.75,0.75])
+    pl10=plotinit(w.Frame10,[0.15,0.2,0.75,0.75])
+    pl11=plotinit(w.Frame11,[0.15,0.2,0.75,0.75])
+    #recovery plots
     pl12=plotinit(w.Frame12)
-    pl13=plotinit(w.Frame13)
+    pl13=plotinit(w.Frame13,[0.15,0.2,0.75,0.75])
     pl14=plotinit(w.Frame14)
     on_load(last_entry_conf)
 
@@ -377,18 +383,22 @@ def on_load(last_entry_conf):
         point_num.set(readed[4])
 
 
-def plotinit(framename):
+def plotinit(frameobj,p=[0,0,0,0]):
     global w
-    f1=framename
-    f= Figure(figsize=(6, 4), dpi=100)
+    f1=frameobj
+    f= Figure()
     ax1= f.add_subplot(111)
+    par=array(p)
+    if (par!=0).all():
+        ax1.set_position(p)
+
     canvas= FCTkAgg(f, f1)
     toolbar = NavigationToolbar2Tk(canvas, f1 )
     toolbar.pack()
     canvas.get_tk_widget().pack()
     return ax1, canvas
 
-def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b',ylab="xxx"):
+def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b',ylab="yyy",xlab="xxx"):
     ax.clear()
     try: #check for y
         ax.plot(x,y)
@@ -401,14 +411,11 @@ def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b',ylab="xxx"):
     if logactive:
         locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12)
         ax.xaxis.set_major_locator(locmaj)
-        #locmin = matplotlib.ticker.LogLocator(base=10,subs=(0.2,0.4,0.6,0.8),numticks=12)
-        #ax.xaxis.set_minor_locator(locmin)
-        #ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-        #ax.grid(True,which='both',ls="-")
         ax.loglog()
 
     ax.grid()
     ax.set_ylabel(ylab)
+    ax.set_xlabel(xlab)
     canvasobj.draw()
 
 def destroy_window():
@@ -505,7 +512,7 @@ def get_freq():
             fs=float(freq_samp.get())
     return fs
 
-    
+
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()

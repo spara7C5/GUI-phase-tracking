@@ -1,5 +1,5 @@
 ####################################################
-######  PSD: direct vs library methods comparison ##
+######  PSD: direct method via Fourier Transform  ##
 ####################################################
 
 from pylab import *

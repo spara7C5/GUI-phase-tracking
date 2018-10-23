@@ -48,3 +48,20 @@ def datagen(dearr,thearr,phiarr):
 	#the order of the output is the same of the
 	#experimental setup real-imag-imag-real
 	return array(rex), array(imx), array(imy), array(rey)
+
+
+import numpy.random as npr
+class RandomWalk:
+
+	def __init__(self, pow1hz,fs):
+		self.last=0
+		self.randlis=[]
+		self.ampli=sqrt(2*pi*pi*pow1hz/fs)
+
+	def funrand(self,t):
+		for i in range(t):
+			step = npr.normal(0,1)
+			self.last+= step #+ (10**(-5))*npr.normal())
+			self.randlis.append(self.last)
+		self.randarr=array(self.randlis)
+		self.randarr*=self.ampli
