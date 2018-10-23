@@ -8,9 +8,12 @@ GUI-phase-tracking is a Graphical User Interface Software for the investigation 
 
 
 
-### Prerequisites
+### OS Prerequisites
+
+#### Linux-like
 
 * Python (>=3)
+
 * Tkinter (tested on 8.6)
 	To install tkinter you should use your package manager:
     * Debian:
@@ -45,6 +48,11 @@ pip install numexpr
 ```
 pip install matplotlib
 ```
+#### Windows-like
+
+The software fully runs on Win10.
+A complete guide of installation is still not ready...
+A dedicated installer is on the way....
 
 ## Running 
 
@@ -78,5 +86,5 @@ python3 GUI-phase.py
 ## Authors
 
 * [**Stefano PARAcchino**](https://github.com/spara7C5) - *Initial work* and main developer
-* [**Federico Bassigna**](https://github.com/JustMe011) - Consultant, troublesolver, implementer of experimental branches
+* [**Federico Bassignana**](https://github.com/JustMe011) - Consultant, troublesolver, implementer of experimental branches
 
