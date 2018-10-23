@@ -1,7 +1,7 @@
 # GUI-phase-tracking
 
 ## What is it? 
-GUI-phase-tracking is a Graphical User Interface Software for the investigation of the polarization insensitive phase recovery algorithm presented in the dedicated repository in the home.
+GUI-phase-tracking is a Graphical User Interface Software for the investigation of the polarization insensitive phase recovery algorithm presented in the dedicated repository in the repository home.
 
 
 ## Getting Started
@@ -70,6 +70,7 @@ python3 GUI-phase.py
 
 ## Built With
 
+* [SYMPY](https://docs.sympy.org/latest/index.html) - Symbolic calculation library
 * [PAGE](http://page.sourceforge.net/) - Python Automatic GUI Generator
 * [NUMPY](http://www.numpy.org/) - Package for scientific computing with Python
 * [NUMEXPR](https://github.com/pydata/numexpr) - Fast numerical expression evaluator for NumPy
@@ -77,5 +78,5 @@ python3 GUI-phase.py
 ## Authors
 
 * [**Stefano PARAcchino**](https://github.com/spara7C5) - *Initial work* and main developer
-
+* [**Federico Bassigna**](https://github.com/JustMe011) - Consultant, troublesolver, implementer of experimental branches
 
