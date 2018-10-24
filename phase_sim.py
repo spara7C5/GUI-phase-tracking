@@ -1,5 +1,5 @@
-################  PARAMETER RECOVERY ######################
-############# from simulated data #########################
+################  PARAMETERS RECOVERY ######################
+###########################################################
 
 from pylab import *
 import sympy as sm # many conflicts with pylab, numpy,math,...
@@ -7,11 +7,6 @@ from scipy import signal, random
 import csv
 import time
 #import PSD
-
-
-#### SET THESE FLAGS (Default: 0,0)######
-
-
 
 
 
@@ -183,7 +178,7 @@ def tracker(data,din=1,tin=1,pin=1):
 		#sigt=sig_noise*uu[1,1]
 		#sigp=sig_noise*uu[2,2]
 		deB=uu.dot(Wn).dot(deY)
-		#print(sigt)
+		deB[1]-=trunc(deB[1]/(pi))*(pi)
 		B=B+deB
 
 
@@ -207,16 +202,7 @@ def tracker(data,din=1,tin=1,pin=1):
 	print("elapsed time: ",time.time()-t1)
 	###########################################
 
-
-
-	########### plot section ##################
-
-
-	#
-
 	return array(dell),array(thel),array(phil)
-
-
 
 ########################################################################
 
@@ -233,22 +219,3 @@ def normalize(x1,x2,x3,x4):
 		o4[i]=x4[i]/mod
 
 	return o1,o2,o3,o4
-
-import numpy.random as npr
-
-class RandomWalk:
-
-
-
-	def __init__(self, pow1hz,fs):
-		self.last=0
-		self.randlis=[]
-		self.ampli=sqrt(2*pi*pi*pow1hz/fs)
-
-	def funrand(self,t):
-		for i in range(t):
-			step = npr.normal(0,1)
-			self.last+= step #+ (10**(-5))*npr.normal())
-			self.randlis.append(self.last)
-		self.randarr=array(self.randlis)
-		self.randarr*=self.ampli
