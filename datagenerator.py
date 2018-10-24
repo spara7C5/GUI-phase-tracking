@@ -1,9 +1,6 @@
 
-############# SIMULATOR OF THE COHERENT RECEIVER CHANNELS ############
-####         main function input: 3 functions, 4 bools
-#### 			   output: 4-channels data file, parameters plot,
-####				   parameters file (if activated)
-####				   poincare' sphere (if activated)
+
+### SIMULATOR OF THE OPTICAL FIBER ######
 
 
 from numpy import *
@@ -14,6 +11,7 @@ matplotlib.use("TkAgg") #setting Tk ad windows manager
 from mpl_toolkits.mplot3d import Axes3D
 import time
 
+###### fiber model: Jones calculation ########
 def fibmod(delta,theta,phi):
 	R1=array([[cos(theta),sin(theta)],[-sin(theta),cos(theta)]])
 	M=array([[e**(1j*(-delta/2)),0],[0,e**(1j*(delta/2))]])
@@ -49,6 +47,7 @@ def datagen(dearr,thearr,phiarr):
 	#experimental setup real-imag-imag-real
 	return array(rex), array(imx), array(imy), array(rey)
 
+### random walk generator ###########
 
 import numpy.random as npr
 class RandomWalk:

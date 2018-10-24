@@ -58,6 +58,8 @@ except ImportError:
     import tkinter.ttk as ttk
     py3 = True
 
+from tkinter import messagebox
+
 
 # Config files:
 CONFIG_PATH = pathlib.Path.cwd() / 'configFiles'
@@ -153,7 +155,7 @@ def phipsd_pressed(p1):
     ax.loglog()
     ax.grid()
     ax.set_ylabel("Phase PSD (V^2/Hz)")
-    ax.set_xlabel("freqeuncy (Hz)")
+    ax.set_xlabel("frequency (Hz)")
     f.show()
     sys.stdout.flush()
     f.show()
@@ -182,6 +184,7 @@ def track_start(p1):
 
 def LoadSim_pressed(p1):
     global w,loaddata,data_dir_load,issim,f_ph
+
 
     samples = int(point_num.get())
 
@@ -222,7 +225,7 @@ def LoadSim_pressed(p1):
     data_dir_load=1
     issim=1
 
-    write_last(func_read,times_read,samples)
+    write_last(func_read,times_read,samples,pow_list)
 
 
 def Refresh_PSD(p1):
@@ -304,19 +307,15 @@ def Refresh_pressed(p1):
     if applyfilt.get():
         try:
             fss=get_freq()
-            print("1")
             fcc=float(freq_cut.get())
-            print("2")
             filtenter=1
-            print("3")
             if dataorig_f:
-                    print("4")
                     loaddataprev=copy.copy(loaddata)
             loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
             print("5")
 
         except ValueError:
-            print("data fcut missing!")
+            print("data fsamp missing!")
     else:
         try:
             if not(noiseenter) :
@@ -381,6 +380,12 @@ def on_load(last_entry_conf):
         st_de.set(readed[3])
         # Sample number
         point_num.set(readed[4])
+        # Rand Noise delta
+        rand_de.set(readed[5])
+        # Rand Noise theta
+        rand_te.set(readed[6])
+        # Rand Noise phi
+        rand_ph.set(readed[7])
 
 
 def plotinit(frameobj,p=[0,0,0,0]):
@@ -429,10 +434,10 @@ def destroy_window():
  # Write functions
 
 
-def write_last(func_read,times_read,samples):
+def write_last(func_read,times_read,samples,rands):
     print('GUI_phase_support.on_closing')
     #sys.stdout.flush()
-    print(func_read,times_read,samples)
+    print(func_read,times_read,samples,rands)
 
 
     # Let's create LAST_ENTRY_NAME file:
@@ -444,26 +449,31 @@ def write_last(func_read,times_read,samples):
     if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
         create_last_entry(conf_parser_obj)
 
-    update_last_entry(conf_parser_obj,func_read,times_read,samples)
+    update_last_entry(conf_parser_obj,func_read,times_read,samples,rands)
 
 def create_last_entry(conf_parser_obj):
 
 
     conf_parser_obj.add_section('EQUATIONS')
+    conf_parser_obj.add_section('RANDWALK_VALS')
     conf_parser_obj.add_section('SAMPLING_TIMES')
     conf_parser_obj.add_section('N_SAMPLING')
 
-def update_last_entry(conf_parser_obj,func_read,times_read,samples):
-    print('toupdate')
-    # Equations
 
+def update_last_entry(conf_parser_obj,func_read,times_read,samples,rands):
+    print('to update')
+
+    # Equations
     for i_eq_up in range(len(func_read)):
         conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq_up+1), func_read[i_eq_up])
-
+    #Random walk values
+    for i_rand in range(len(rands)):
+        conf_parser_obj.set('RANDWALK_VALS', 'rand_' + str(i_rand),rands[i_rand])
     # Sampling times
     conf_parser_obj.set('SAMPLING_TIMES', 'times', str(times_read))
     # Number of sampling
     conf_parser_obj.set('N_SAMPLING', 'num', str(samples))
+
 
     with open(str(CONFIG_PATH / LAST_ENTRY_NAME), 'w') as lastfile:
         conf_parser_obj.write(lastfile)
@@ -474,6 +484,7 @@ def update_last_entry(conf_parser_obj,func_read,times_read,samples):
 def read_last_entry(conf_parser_obj):
     eq = []
     times = []
+    rand= []
 
     conf_parser_obj.read(CONFIG_PATH / LAST_ENTRY_NAME)
     #print(conf_parser_obj.sections())
@@ -481,13 +492,15 @@ def read_last_entry(conf_parser_obj):
     # Equations
     for i_eq_read in range(3):
         eq.append(conf_parser_obj.get('EQUATIONS','eq_' + str(i_eq_read+1)))
+    for i_rand in range(3):
+        rand.append(conf_parser_obj.get('RANDWALK_VALS', 'rand_' + str(i_rand)))
     # Sampling times
     times.append(conf_parser_obj.get('SAMPLING_TIMES', 'times'))
     # Number of sampling
     num = conf_parser_obj.get('N_SAMPLING', 'num')
 
     # Now I'll fill the Entries
-    read_val = merge_arrays([eq,times,num])
+    read_val = merge_arrays([eq,times,num,rand])
 
     return read_val
 
@@ -501,15 +514,21 @@ def merge_arrays (list_of_lists):
             tmp_list.append(list_of_lists[i_list])
     return tmp_list
 
-
+### general function to get the correct frequency throughout the program
 def get_freq():
+    #if we are in the load from simulation, frequency is from Tsamp
     if issim:
         fs=1/float(st_de.get())
-    else :
-        try:
-            fs=float(freq_samp.get())/int(num_down.get())
-        except ValueError:
+    else : #load from real data
+        try: #check if the frequency value is inserted
             fs=float(freq_samp.get())
+        except ValueError:
+                messagebox.showerror("Error", "You must specify the sampling frequency")
+        try:
+            nd=int(num_down.get())
+            fs/=nd
+        except ValueError:
+            pass
     return fs
 
 
