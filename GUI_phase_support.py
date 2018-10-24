@@ -225,8 +225,7 @@ def LoadSim_pressed(p1):
     data_dir_load=1
     issim=1
 
-    write_last(func_read,times_read,samples,pow_list)
-
+    write_last(func_read=func_read,times_read=times_read,samples=samples,rands=pow_list)
 
 def Refresh_PSD(p1):
 
@@ -265,6 +264,11 @@ def LoadFile_pressed(e):
     issim=0
     upload_check.set("Done!")
 
+    write_last(path_name=filename.get(),
+        delimiter=cont_delim.get(),
+        chunck=cont_chunck.get(),
+        mixer=freq_lo.get(),
+        down=num_down.get())
 
 
 #    idea of the refresh button:
@@ -369,23 +373,27 @@ def init(top, gui, *args, **kwargs):
 def on_load(last_entry_conf):
     if (CONFIG_PATH / LAST_ENTRY_NAME).exists():
 
-        readed = read_last_entry(last_entry_conf)
+        readd = read_last_entry(last_entry_conf)
         # equations
+        filename.set(readd[0])
+        cont_delim.set(readd[1])
+        cont_chunck.set(readd[2])
+        freq_lo.set(readd[3])
+        num_down.set(readd[4])
 
-
-        eq_de.set(readed[0])
-        eq_te.set(readed[1])
-        eq_ph.set(readed[2])
+        eq_de.set(readd[5])
+        eq_te.set(readd[6])
+        eq_ph.set(readd[7])
         # Sampling times
-        st_de.set(readed[3])
+        st_de.set(readd[8])
         # Sample number
-        point_num.set(readed[4])
+        point_num.set(readd[9])
         # Rand Noise delta
-        rand_de.set(readed[5])
+        rand_de.set(readd[10])
         # Rand Noise theta
-        rand_te.set(readed[6])
+        rand_te.set(readd[11])
         # Rand Noise phi
-        rand_ph.set(readed[7])
+        rand_ph.set(readd[12])
 
 
 def plotinit(frameobj,p=[0,0,0,0]):
@@ -434,10 +442,18 @@ def destroy_window():
  # Write functions
 
 
-def write_last(func_read,times_read,samples,rands):
+def write_last(path_name="",
+    delimiter="",
+    chunck="",
+    mixer="",
+    down="",
+    func_read=["","",""],
+    times_read="",
+    samples="",
+    rands=["","",""]):
     print('GUI_phase_support.on_closing')
     #sys.stdout.flush()
-    print(func_read,times_read,samples,rands)
+
 
 
     # Let's create LAST_ENTRY_NAME file:
@@ -449,20 +465,29 @@ def write_last(func_read,times_read,samples,rands):
     if not (CONFIG_PATH / LAST_ENTRY_NAME).exists():
         create_last_entry(conf_parser_obj)
 
-    update_last_entry(conf_parser_obj,func_read,times_read,samples,rands)
+    update_last_entry(conf_parser_obj,path_name, delimiter,chunck, mixer,down,func_read,times_read,samples,rands)
 
 def create_last_entry(conf_parser_obj):
 
-
+    conf_parser_obj.add_section('PATH_NAME')
+    conf_parser_obj.add_section('DELIMITER')
+    conf_parser_obj.add_section('CHUNCK')
+    conf_parser_obj.add_section('MIXER')
+    conf_parser_obj.add_section('DOWN')
     conf_parser_obj.add_section('EQUATIONS')
     conf_parser_obj.add_section('RANDWALK_VALS')
     conf_parser_obj.add_section('SAMPLING_TIMES')
     conf_parser_obj.add_section('N_SAMPLING')
 
 
-def update_last_entry(conf_parser_obj,func_read,times_read,samples,rands):
+def update_last_entry(conf_parser_obj,path_name, delimiter,chunck, mixer,down,func_read,times_read,samples,rands):
     print('to update')
 
+    conf_parser_obj.set('PATH_NAME', 'path_name', str(path_name))
+    conf_parser_obj.set('DELIMITER', 'delimiter', str(delimiter))
+    conf_parser_obj.set('CHUNCK', 'chunck', str(chunck))
+    conf_parser_obj.set('MIXER', 'mixer', str(mixer))
+    conf_parser_obj.set('DOWN', 'down', str(down))
     # Equations
     for i_eq_up in range(len(func_read)):
         conf_parser_obj.set('EQUATIONS','eq_' + str(i_eq_up+1), func_read[i_eq_up])
@@ -488,6 +513,11 @@ def read_last_entry(conf_parser_obj):
 
     conf_parser_obj.read(CONFIG_PATH / LAST_ENTRY_NAME)
     #print(conf_parser_obj.sections())
+    path_name=conf_parser_obj.get('PATH_NAME', 'path_name')
+    delimiter=conf_parser_obj.get('DELIMITER', 'delimiter')
+    chunck=conf_parser_obj.get('CHUNCK', 'chunck')
+    mixer=conf_parser_obj.get('MIXER', 'mixer')
+    down=conf_parser_obj.get('DOWN', 'down')
 
     # Equations
     for i_eq_read in range(3):
@@ -500,7 +530,7 @@ def read_last_entry(conf_parser_obj):
     num = conf_parser_obj.get('N_SAMPLING', 'num')
 
     # Now I'll fill the Entries
-    read_val = merge_arrays([eq,times,num,rand])
+    read_val = merge_arrays([path_name, delimiter,chunck, mixer,down,eq,times,num,rand])
 
     return read_val
 
