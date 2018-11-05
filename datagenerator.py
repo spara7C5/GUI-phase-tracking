@@ -31,8 +31,7 @@ def datagen(dearr,thearr,phiarr):
 		dd=dearr[i]
 		tt=thearr[i]
 		pp=phiarr[i]
-
-
+		
 		Eout=fibmod(dd,tt,pp)
 		Exr=Eout[0].real
 		Exi=Eout[0].imag
@@ -42,6 +41,15 @@ def datagen(dearr,thearr,phiarr):
 		imx.append(Exi)
 		rey.append(Eyr)
 		imy.append(Eyi)
+		t.append(i)
+
+
+	## writing ALSO on file
+	outlist=list(zip(t,rex,imx,rey,imy))
+	f=open("eout.csv",'w')
+	w=csv.writer(f, delimiter='\t')
+	w.writerows(outlist)
+	f.close()
 
 	#the order of the output is the same of the
 	#experimental setup real-imag-imag-real
