@@ -2,7 +2,10 @@
 
 
 import sympy as sm
-from numpy import pi,array
+############# explicit import to avoid conflicts with sympy ################
+from numpy import pi,array,fabs,e,sin,cos,arccos,arange,linspace 
+############################################################################
+from matplotlib.pyplot import *
 
 import mpmath as mpm
 
@@ -15,13 +18,14 @@ def round2zero(m, e):
 			if abs(m[i,j]) < e:
 				m[i,j] = 0
 
-
+def myabs(x):
+	return sm.sqrt((sm.re(x)**2)+(sm.im(x)**2))
 
 ###generic birefringent element
 R1=sm.Matrix([[sm.cos(theta),sm.sin(theta)],[-sm.sin(theta),sm.cos(theta)]])
 M=sm.Matrix([[sm.exp(sm.I*(-delta/2)),0],[0,sm.exp(sm.I*(delta/2))]])
 R2=sm.transpose(R1)
-Fib=R2*M*R1
+Fib=R2*M*R1*sm.exp(sm.I*(phi))
 
 ## non ideal Faraday rotator
 Mag=sm.Matrix([[sm.cos(p),-sm.sin(p)],[sm.sin(p),sm.cos(p)]])
@@ -41,27 +45,50 @@ Roundtrip=Fib*FMR*Fib
 
 ## Launched Field
 
-Ein=sm.Matrix([[sm.cos(sm.pi/4)*sm.exp(sm.I*(sm.pi/2))],[sm.sin(sm.pi/4)]])*sm.exp(sm.I*(phi))*E
+Ein=sm.Matrix([[sm.cos(sm.pi/4)*sm.exp(sm.I*(sm.pi/2))],[sm.sin(sm.pi/4)]])*E##*sm.exp(sm.I*(phi))
 Eout=Roundtrip*Ein
 
 ## reflection on the short branch
 Einr=sm.Matrix([[666],[666]])
 Einr[0,0],Einr[1,0]=-Ein[1,0],Ein[0,0]
 
-beatvec=abs(sm.simplify(Einr+Eout))
+beatvec=(sm.Matrix([[myabs(sm.simplify(Einr[0,0]+Eout[0,0]))],[myabs(sm.simplify(Einr[1,0]+Eout[1,0]))]]))
 beat=(beatvec[0,0]**2)+(beatvec[1,0]**2)
 sm.pprint("Ein= ")
 sm.pprint(sm.factor(sm.simplify(Ein)))
 sm.pprint("Eout= ")
-sm.pprint(sm.factor(sm.simplify(Eout)))
-sm.pprint("Eout+Ein= ")
-
+sm.pprint((sm.trigsimp(Eout)))
+sm.pprint("Abs(Eout+Einr)= ")
+sm.pprint((beatvec))
 
 ##results:
-round2zero(beat,10**(-15))
-sm.pprint(sm.simplify(beat-2*E**2))
+#round2zero(beat,10**(-15))
+sm.pprint((beat-2*E**2))
 
-sm.lamdify
+
+
+beatv=sm.lambdify((E,delta,theta,phi),beat-2*E**2,'numpy')
+
+
+print("================================ \n================================")
+
+dell=array([sin(x) for x in linspace(0,pi/4,100)])
+#thel=array([sin(x) for x arange(0,pi/4,0.01)])
+phil=array([sin(x) for x in linspace(0,pi,100)])
+
+
+detval=beatv(1,dell,phil,phil)
+detphase=(arccos(detval/2))/2
+print(detphase)
+
+
+f1=figure()
+s1=f1.add_subplot(111)
+s1.plot(detphase)
+s1.plot(dell)
+s1.plot(phil)
+show()
+
 
 
 '''
