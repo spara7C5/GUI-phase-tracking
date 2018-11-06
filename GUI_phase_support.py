@@ -25,6 +25,7 @@
 #    Oct 08, 2018 05:08:12 PM CEST  platform: Linux
 #    Oct 09, 2018 09:52:04 AM CEST  platform: Linux
 #    Oct 09, 2018 02:36:59 PM CEST  platform: Linux
+#    Nov 06, 2018 03:52:25 PM CET  platform: Linux
 
 import sys
 from tkinter import filedialog
@@ -143,7 +144,8 @@ def set_Tk_var():
     global in_ph
     in_ph = StringVar()
 
-
+    global Text1
+    Text1 = StringVar()
 
 def phipsd_pressed(p1):
     psd00=PSD.plotpsd(f_ph,1/float(st_de.get()))
@@ -340,7 +342,7 @@ def Search_pressed(e):
     global filename
     name=filedialog.askopenfilename(initialdir=".")
     filename.set(name)
-    w.Text1.insert(END,filename.get())
+    Text1.set(filename.get())
     sys.stdout.flush()
 
 
@@ -394,6 +396,8 @@ def on_load(last_entry_conf):
         rand_te.set(readd[11])
         # Rand Noise phi
         rand_ph.set(readd[12])
+        
+        Text1.set("no file selected")
 
 
 def plotinit(frameobj,p=[0,0,0,0]):
@@ -565,3 +569,6 @@ def get_freq():
 if __name__ == '__main__':
     import GUI_phase
     GUI_phase.vp_start_gui()
+
+
+

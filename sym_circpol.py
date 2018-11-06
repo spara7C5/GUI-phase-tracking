@@ -33,7 +33,7 @@ Mir=sm.Matrix([[1,0],[0,1]])
 
 Magv=sm.lambdify(p,Mag,'numpy')
 
-angs=45
+angs=44
 ang=angs*(pi/180)
 
 FMR=Magv(ang)*Mir*Magv(ang)
@@ -48,9 +48,11 @@ Roundtrip=Fib*FMR*Fib
 Ein=sm.Matrix([[sm.cos(sm.pi/4)*sm.exp(sm.I*(sm.pi/2))],[sm.sin(sm.pi/4)]])*E##*sm.exp(sm.I*(phi))
 Eout=Roundtrip*Ein
 
-## reflection on the short branch
+## reflection on the short branch NOTE: THIS IS CONSIDERED AS PERFECT
 Einr=sm.Matrix([[666],[666]])
 Einr[0,0],Einr[1,0]=-Ein[1,0],Ein[0,0]
+#Einr=FMR*Ein
+
 
 beatvec=(sm.Matrix([[myabs(sm.simplify(Einr[0,0]+Eout[0,0]))],[myabs(sm.simplify(Einr[1,0]+Eout[1,0]))]]))
 beat=(beatvec[0,0]**2)+(beatvec[1,0]**2)
@@ -72,21 +74,23 @@ beatv=sm.lambdify((E,delta,theta,phi),beat-2*E**2,'numpy')
 
 print("================================ \n================================")
 
-dell=array([sin(x) for x in linspace(0,pi/4,100)])
-#thel=array([sin(x) for x arange(0,pi/4,0.01)])
-phil=array([sin(x) for x in linspace(0,pi,100)])
+dell=array([1+0.7*sin(x) for x in linspace(0,2*pi,2000)])
+thel=array([0.3 for x in linspace(0,2*pi,2000)])
+phil=array([1+0.1*x for x in linspace(0,1,2000)])
 
 
-detval=beatv(1,dell,phil,phil)
+detval=beatv(1,dell,dell,phil)
 detphase=(arccos(detval/2))/2
-print(detphase)
+#print(detphase)
 
 
 f1=figure()
 s1=f1.add_subplot(111)
-s1.plot(detphase)
-s1.plot(dell)
-s1.plot(phil)
+s1.plot(detphase-phil,"blue")
+s1.plot(dell,"red")
+s1.plot(thel,"orange")
+s1.plot(phil,"green")
+s1.grid()
 show()
 
 
