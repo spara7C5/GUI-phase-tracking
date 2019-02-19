@@ -44,7 +44,16 @@ def datagen(dearr,thearr,phiarr):
 		t.append(i)
 
 
+
 	## writing ALSO on file
+
+	#rex=[sin(2*pi*500*0.000000079*i+0.3) for i in arange(50,3500)]
+	#imx=[cos(2*pi*500*0.000000079*i+0.3) for i in arange(50,3500)]
+	#imy=[-sin(2*pi*500*0.000000079*i+0.3) for i in arange(50,3500)]
+	#rey=[cos(2*pi*500*0.000000079*i+0.3) for i in arange(50,3500)]
+
+
+
 	outlist=list(zip(t,rex,imx,rey,imy))
 	f=open("eout.csv",'w')
 	w=csv.writer(f, delimiter='\t')

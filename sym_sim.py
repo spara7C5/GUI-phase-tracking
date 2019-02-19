@@ -7,6 +7,8 @@ from numpy import pi,array,fabs,e,sin,cos,arccos,arange,linspace
 ############################################################################
 from matplotlib.pyplot import *
 
+from scipy.signal import square
+
 import mpmath as mpm
 
 delta, theta,phi,Y1,Y2,Y3,Y4,p,E=sm.symbols("delta theta phi Y1 Y2 Y3 Y4 p E", real=True)
@@ -22,26 +24,32 @@ def myabs(x):
 	return sm.sqrt((sm.re(x)**2)+(sm.im(x)**2))
 
 ###generic birefringent element
+theta=sm.pi/4
+delta=sm.pi
 R1=sm.Matrix([[sm.cos(theta),sm.sin(theta)],[-sm.sin(theta),sm.cos(theta)]])
 M=sm.Matrix([[sm.exp(sm.I*(-delta/2)),0],[0,sm.exp(sm.I*(delta/2))]])
 R2=sm.transpose(R1)
 Fib=R2*M*R1*sm.exp(sm.I*(phi))
+#Fib=sm.Matrix([[0,-1],[-1,0]])
 
+sm.pprint(Fib)
 ## non ideal Faraday rotator
+
+
 Mag=sm.Matrix([[sm.cos(p),-sm.sin(p)],[sm.sin(p),sm.cos(p)]])
 Mir=sm.Matrix([[1,0],[0,1]])
 
 Magv=sm.lambdify(p,Mag,'numpy')
-
-angs=44
+#######
+print("insert rotation angle:")
+angs=int(input())
+#######
 ang=angs*(pi/180)
-
-FMR=Magv(ang)*Mir*Magv(ang)
-
-round2zero(FMR,10**(-15))
-sm.pprint("FMR= ")
-sm.pprint(FMR)
-Roundtrip=Fib*FMR*Fib
+FM=Magv(ang)*Mir*Magv(ang)
+round2zero(FM,10**(-15))
+sm.pprint("FM= ")
+sm.pprint(FM)
+Roundtrip=Fib*FM*Fib
 
 ## Launched Field
 
@@ -51,7 +59,10 @@ Eout=Roundtrip*Ein
 ## reflection on the short branch NOTE: THIS IS CONSIDERED AS PERFECT
 Einr=sm.Matrix([[666],[666]])
 Einr[0,0],Einr[1,0]=-Ein[1,0],Ein[0,0]
-#Einr=FMR*Ein
+angssh=45
+angsh=angssh*(pi/180)
+FMsh=Magv(angsh)*Mir*Magv(angsh)
+Einr=FMsh*Ein
 
 
 beatvec=(sm.Matrix([[myabs(sm.simplify(Einr[0,0]+Eout[0,0]))],[myabs(sm.simplify(Einr[1,0]+Eout[1,0]))]]))
@@ -74,23 +85,30 @@ beatv=sm.lambdify((E,delta,theta,phi),beat-2*E**2,'numpy')
 
 print("================================ \n================================")
 
-dell=array([1+0.7*sin(x) for x in linspace(0,2*pi,2000)])
-thel=array([0.3 for x in linspace(0,2*pi,2000)])
-phil=array([1+0.1*x for x in linspace(0,1,2000)])
+dell=array(1+0.25*square([x for x in linspace(0,4*(2*pi),2000)]))
+#dell=array(([sin(x) for x in linspace(0,4*(2*pi),2000)]))
 
+thel=array(1+0.2*square([x for x in linspace(0,4*(2*pi),2000)]))
+#thel=array([0.3*sin(x) for x in linspace(0,2*pi,2000)])
 
-detval=beatv(1,dell,dell,phil)
-detphase=(arccos(detval/2))/2
+phil=array([1.5-0.5*x for x in linspace(0,1,2000)])
+#phil=array(0.1*square([x for x in linspace(0,4*(2*pi),2000)]))
+#phil=array([1 for x in linspace(0,1,2000)])
+
+detval=beatv(1,dell,thel,phil)
+detphase=(arccos(detval/2))/2 #from the interference formula
 #print(detphase)
 
 
 f1=figure()
 s1=f1.add_subplot(111)
-s1.plot(detphase-phil,"blue")
-s1.plot(dell,"red")
-s1.plot(thel,"orange")
-s1.plot(phil,"green")
+s1.plot(detphase,"blue",label="far.rotat.={}".format(angs))
+s1.plot(dell,"red",label="delta")
+s1.plot(thel,"orange",label="theta")
+s1.plot(phil,"green",label="isotr. phi shift")
+s1.set_ylabel("phase/angle (rad)")
 s1.grid()
+s1.legend()
 show()
 
 

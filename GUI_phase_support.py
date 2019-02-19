@@ -35,7 +35,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure
-import phase_sim
+import dsp_core
 from parser_sim import parse_function, parse_x
 from numpy import *
 import codecs
@@ -175,11 +175,11 @@ def track_start(p1):
     check_track.set("Wait...")
     try :
         startp=[float(in_de.get()),float(in_te.get()),float(in_ph.get())]
-        dell,thel,phil=phase_sim.tracker(loaddata,startp[0],startp[1],startp[2])
+        dell,thel,phil=dsp_core.tracker(loaddata,startp[0],startp[1],startp[2])
     except ValueError :
-        dell,thel,phil=phase_sim.tracker(loaddata)
+        dell,thel,phil=dsp_core.tracker(loaddata)
     tot=array([dell,thel,phil])
-    plotrefresh(pl12[0],pl12[1],tot,col=["red","orange","green"],ylab="phase (rad)")
+    plotrefresh(pl12[0],pl12[1],x=tot,y=loaddata[0],col=["red","orange","green"],ylab="phase (rad)",xlab="time (s)")
     check_track.set("Done...")
     if issim:
         plotrefresh(pl14[0],pl14[1],phil-f_ph,col="green",ylab="residual (rad)")
@@ -234,7 +234,7 @@ def Refresh_PSD(p1):
 
     loadpsd=empty_like(loaddata,dtype=float)
     if issim==0:
-        loadpsd[1:5]=phase_sim.normalize(loaddata[1],loaddata[2],loaddata[3],loaddata[4])
+        loadpsd[1:5]=dsp_core.normalize(loaddata[1],loaddata[2],loaddata[3],loaddata[4])
     else:
         loadpsd=loaddata
     fs=get_freq()
@@ -255,13 +255,13 @@ def LoadFile_pressed(e):
     upload_check.set("Waiting...")
     w.Button3.config(relief=SUNKEN)
     del_decoded=codecs.decode(cont_delim.get(), 'unicode_escape')
-    loaddata=array(phase_sim.loader(filename.get(),int(cont_chunck.get()),del_decoded))
+    loaddata=array(dsp_core.loader(filename.get(),int(cont_chunck.get()),del_decoded))
 
 
     if lo_mix.get():
-        loaddata[1:5]=phase_sim.downconvert(loaddata,float(freq_lo.get()))
+        loaddata[1:5]=dsp_core.downconvert(loaddata,float(freq_lo.get()))
     if downsamp.get():
-        loaddata=array(phase_sim.downsampl(loaddata,int(num_down.get())))
+        loaddata=array(dsp_core.downsampl(loaddata,int(num_down.get())))
     data_dir_load=1
     issim=0
     upload_check.set("Done!")
@@ -297,7 +297,7 @@ def Refresh_pressed(p1):
             noiseenter=1
             if dataorig:
                 loaddataprev=copy.copy(loaddata)
-            loaddata[1:5]=phase_sim.whitenoise(loaddata[1:5],float(pow_value.get()),fss)
+            loaddata[1:5]=dsp_core.whitenoise(loaddata[1:5],float(pow_value.get()),fss)
         except ValueError:
             print("data fsamp missing")
     else:
@@ -317,7 +317,7 @@ def Refresh_pressed(p1):
             filtenter=1
             if dataorig_f:
                     loaddataprev=copy.copy(loaddata)
-            loaddata[1:5]=phase_sim.lowfilter(loaddata[1:5],fcc,fss)
+            loaddata[1:5]=dsp_core.lowfilter(loaddata[1:5],fcc,fss)
             print("5")
 
         except ValueError:
@@ -331,10 +331,10 @@ def Refresh_pressed(p1):
         except NameError:
             print("filter not yet applied")
 
-    plotrefresh(pl4[0],pl4[1],loaddata[1],ylab="ch1 (V)")
-    plotrefresh(pl5[0],pl5[1],loaddata[2],ylab="ch2 (V)")
-    plotrefresh(pl6[0],pl6[1],loaddata[3],ylab="ch3 (V)")
-    plotrefresh(pl7[0],pl7[1],loaddata[4],ylab="ch4 (V)")
+    plotrefresh(pl4[0],pl4[1],loaddata[0],loaddata[1],ylab="ch1 (V)",xlab="time (s)")
+    plotrefresh(pl5[0],pl5[1],loaddata[0],loaddata[2],ylab="ch2 (V)",xlab="time (s)")
+    plotrefresh(pl6[0],pl6[1],loaddata[0],loaddata[3],ylab="ch3 (V)",xlab="time (s)")
+    plotrefresh(pl7[0],pl7[1],loaddata[0],loaddata[4],ylab="ch4 (V)",xlab="time (s)")
 
 
 
@@ -416,13 +416,15 @@ def plotinit(frameobj,p=[0,0,0,0]):
     return ax1, canvas
 
 def plotrefresh(ax, canvasobj,x,y=None,logactive=0,col='b',ylab="yyy",xlab="xxx"):
+    ## be careful: x and y don't correspond always to abscissa and ordinate!!
     ax.clear()
     try: #check for y
         ax.plot(x,y)
     except ValueError: #check for multiple x
         if len(x.shape)>1:
             for n,i in enumerate(x): #multicolor plot
-                ax.plot(i,col[n])
+                #y becomes abscissa in the multiple plot case
+                ax.plot(y,i,col[n])
         else:
             ax.plot(x,color=col)
     if logactive:
@@ -554,15 +556,16 @@ def get_freq():
     if issim:
         fs=1/float(st_de.get())
     else : #load from real data
-        try: #check if the frequency value is inserted
+       	try: #check if the frequency value is inserted
             fs=float(freq_samp.get())
         except ValueError:
-                messagebox.showerror("Error", "You must specify the sampling frequency")
-        try:
-            nd=int(num_down.get())
-            fs/=nd
-        except ValueError:
-            pass
+            messagebox.showerror("Error", "You must specify the sampling frequency")
+        if downsamp ==1: #check if data downsample is selected
+            try:
+                nd=int(num_down.get())
+                fs/=nd
+            except ValueError:
+                pass
     return fs
 
 

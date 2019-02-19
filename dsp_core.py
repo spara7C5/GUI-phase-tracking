@@ -66,17 +66,23 @@ def tracker(data,din=1,tin=1,pin=1):
 
 	rex,imx,rey,imy=[],[],[],[]
 
+	
 	rex=data[1]
 	imx=data[2]
-	imy=data[3]
-	rey=data[4]
-
-
+	rey=data[3]
+	imy=data[4]
+	
+	#for the old data collection use this set:
+	'''
+	rex=data[3]
+	imx=data[4]
+	rey=data[2]
+	imy=data[1]
+	'''
 
 	########################################
 	######## DSP ALGORITHM         #########
 	########################################
-
 
 	#### W Matrix creation ########
 	#### Symbolic calculation #####
@@ -170,7 +176,7 @@ def tracker(data,din=1,tin=1,pin=1):
 		Wn=Wt(B[0,0],B[1,0],B[2,0])
 		u=Prodv(B[0,0],B[1,0],B[2,0])
 		d=linalg.det(u)
-		detl.append(1/d)
+		#detl.append(1/d)
 
 
 		uu=inv(u)
