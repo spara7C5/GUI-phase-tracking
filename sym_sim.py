@@ -24,8 +24,8 @@ def myabs(x):
 	return sm.sqrt((sm.re(x)**2)+(sm.im(x)**2))
 
 ###generic birefringent element
-theta=sm.pi/4
-delta=sm.pi
+#theta=sm.pi/4
+#delta=sm.pi
 R1=sm.Matrix([[sm.cos(theta),sm.sin(theta)],[-sm.sin(theta),sm.cos(theta)]])
 M=sm.Matrix([[sm.exp(sm.I*(-delta/2)),0],[0,sm.exp(sm.I*(delta/2))]])
 R2=sm.transpose(R1)
@@ -33,10 +33,11 @@ Fib=R2*M*R1*sm.exp(sm.I*(phi))
 #Fib=sm.Matrix([[0,-1],[-1,0]])
 
 sm.pprint(Fib)
+
+
 ## non ideal Faraday rotator
-
-
 Mag=sm.Matrix([[sm.cos(p),-sm.sin(p)],[sm.sin(p),sm.cos(p)]])
+## simple mirror
 Mir=sm.Matrix([[1,0],[0,1]])
 
 Magv=sm.lambdify(p,Mag,'numpy')
@@ -44,6 +45,7 @@ Magv=sm.lambdify(p,Mag,'numpy')
 print("insert rotation angle:")
 angs=int(input())
 #######
+## faraday mirror
 ang=angs*(pi/180)
 FM=Magv(ang)*Mir*Magv(ang)
 round2zero(FM,10**(-15))
@@ -62,8 +64,8 @@ Einr[0,0],Einr[1,0]=-Ein[1,0],Ein[0,0]
 angssh=45
 angsh=angssh*(pi/180)
 FMsh=Magv(angsh)*Mir*Magv(angsh)
+round2zero(FMsh,10**(-15))
 Einr=FMsh*Ein
-
 
 beatvec=(sm.Matrix([[myabs(sm.simplify(Einr[0,0]+Eout[0,0]))],[myabs(sm.simplify(Einr[1,0]+Eout[1,0]))]]))
 beat=(beatvec[0,0]**2)+(beatvec[1,0]**2)
@@ -72,11 +74,10 @@ sm.pprint(sm.factor(sm.simplify(Ein)))
 sm.pprint("Eout= ")
 sm.pprint((sm.trigsimp(Eout)))
 sm.pprint("Abs(Eout+Einr)= ")
-sm.pprint((beatvec))
+sm.pprint(beatvec)
 
 ##results:
-#round2zero(beat,10**(-15))
-sm.pprint((beat-2*E**2))
+sm.pprint(sm.simplify(beat-2*E**2)) #it deletes the constant term to visualize the only oscillating term
 
 
 
@@ -85,13 +86,14 @@ beatv=sm.lambdify((E,delta,theta,phi),beat-2*E**2,'numpy')
 
 print("================================ \n================================")
 
-dell=array(1+0.25*square([x for x in linspace(0,4*(2*pi),2000)]))
+dell=array([0 for x in linspace(0,10,4000)])
+#dell=array([0.5*x for x in linspace(0,10,4000)])+0.1*square([x for x in linspace(0,4*(2*pi),4000)])
 #dell=array(([sin(x) for x in linspace(0,4*(2*pi),2000)]))
 
-thel=array(1+0.2*square([x for x in linspace(0,4*(2*pi),2000)]))
+thel=array([0.5+0.5*x for x in linspace(0,10,4000)])+0.1*square([x for x in linspace(0,4*(2*pi),4000)])
 #thel=array([0.3*sin(x) for x in linspace(0,2*pi,2000)])
 
-phil=array([1.5-0.5*x for x in linspace(0,1,2000)])
+phil=array([1 for x in linspace(0,10,4000)])
 #phil=array(0.1*square([x for x in linspace(0,4*(2*pi),2000)]))
 #phil=array([1 for x in linspace(0,1,2000)])
 
@@ -106,6 +108,7 @@ s1.plot(detphase,"blue",label="far.rotat.={}".format(angs))
 s1.plot(dell,"red",label="delta")
 s1.plot(thel,"orange",label="theta")
 s1.plot(phil,"green",label="isotr. phi shift")
+s1.plot(phil-detphase,"purple",label="phase diff")
 s1.set_ylabel("phase/angle (rad)")
 s1.grid()
 s1.legend()

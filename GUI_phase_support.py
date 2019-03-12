@@ -198,6 +198,8 @@ def LoadSim_pressed(p1):
     f_ph = parse_function(eq_ph.get())
 
     times_read=st_de.get()
+    times_r_fl=float(times_read)
+    timel=[times_r_fl*i for i in range(samples)]
     #fun_list=array([f_de[0],f_te[0],f_ph[0]])
     fun_list=array([f_de,f_te,f_ph])
     ck_list=[ck_rand_de.get(),ck_rand_te.get(),ck_rand_ph.get()]
@@ -220,9 +222,9 @@ def LoadSim_pressed(p1):
 
     plots=array(np_asarray(last_func))
     f_ph=fun_list[2]
-    plotrefresh(pl1[0],pl1[1],fun_list,col=['r',"orange","green"],ylab="del,the,phi (rad)")
+    plotrefresh(pl1[0],pl1[1],fun_list,y=timel,col=['r',"orange","green"],ylab="del,the,phi (rad)")
     loaddata=list(datagenerator.datagen(fun_list[0],fun_list[1],fun_list[2]))
-    loaddata.insert(0,zeros(samples))
+    loaddata.insert(0,timel)
     loadata=array(loaddata)
     data_dir_load=1
     issim=1

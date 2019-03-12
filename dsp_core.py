@@ -67,10 +67,10 @@ def tracker(data,din=1,tin=1,pin=1):
 	rex,imx,rey,imy=[],[],[],[]
 
 	
-	rex=data[1]
-	imx=data[2]
-	rey=data[3]
-	imy=data[4]
+	rex=data[3]
+	imx=data[4]
+	rey=data[1]
+	imy=data[2]
 	
 	#for the old data collection use this set:
 	'''
@@ -95,7 +95,7 @@ def tracker(data,din=1,tin=1,pin=1):
 	M=sm.Matrix([[sm.exp(sm.I*(-delta/2)),0],[0,sm.exp(sm.I*(delta/2))]])
 	R2=sm.transpose(R1)
 	Fib=R2*M*R1
-	Ein=sm.Matrix([sm.cos(sm.pi/4)*sm.exp(sm.I*(sm.pi/2)),sm.sin(sm.pi/4)])*sm.exp(sm.I*(phi))
+	Ein=sm.Matrix([sm.cos(sm.pi/4)*sm.exp(sm.I*(-sm.pi/2)),sm.sin(sm.pi/4)])*sm.exp(sm.I*(phi))
 	Eout=Fib*Ein
 
 	rexS=sm.simplify(sm.re(Eout[0]))
@@ -184,7 +184,9 @@ def tracker(data,din=1,tin=1,pin=1):
 		#sigt=sig_noise*uu[1,1]
 		#sigp=sig_noise*uu[2,2]
 		deB=uu.dot(Wn).dot(deY)
-		deB[1]-=trunc(deB[1]/(pi))*(pi)
+		#deB[0]-=trunc(deB[0]/(pi))*(pi)
+		#deB[1]-=trunc(deB[1]/(pi))*(pi)
+		#deB[2]-=trunc(deB[2]/(pi))*(pi)
 		B=B+deB
 
 
@@ -218,11 +220,17 @@ def normalize(x1,x2,x3,x4):
 # new variables are created in order to leave the input data unchanged
 	l=len(x1)
 	o1=o2=o3=o4=empty(l,dtype=float)
+
 	for i in range(l):
-		mod=sqrt(x1[i]**2 + x2[i]**2 + x3[i]**2 + x4[i]**2)
-		o1[i]=x1[i]/mod
-		o2[i]=x2[i]/mod
-		o3[i]=x3[i]/mod
-		o4[i]=x4[i]/mod
+		#mod=sqrt(x1[i]**2 + x2[i]**2 + x3[i]**2 + x4[i]**2)
+		rms1=sqrt(sum(x1**2))
+		rms2=sqrt(sum(x2**2))
+		rms3=sqrt(sum(x3**2))
+		rms4=sqrt(sum(x4**2))
+		o1[i]=arccos(2*x1[i]/(sqrt(2)*rms1))
+		o2[i]=arccos(2*x2[i]/(sqrt(2)*rms2))
+		o3[i]=arccos(2*x3[i]/(sqrt(2)*rms3))
+		o4[i]=arccos(2*x4[i]/(sqrt(2)*rms4))
+
 
 	return o1,o2,o3,o4

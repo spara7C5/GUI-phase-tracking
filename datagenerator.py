@@ -62,7 +62,7 @@ def datagen(dearr,thearr,phiarr):
 
 	#the order of the output is the same of the
 	#experimental setup real-imag-imag-real
-	return array(rex), array(imx), array(imy), array(rey)
+	return array(rex), array(imx), array(rey), array(imy)
 
 ### random walk generator ###########
 
