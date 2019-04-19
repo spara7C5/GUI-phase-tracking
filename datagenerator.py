@@ -16,7 +16,7 @@ def fibmod(delta,theta,phi):
 	R1=array([[cos(theta),sin(theta)],[-sin(theta),cos(theta)]])
 	M=array([[e**(1j*(-delta/2)),0],[0,e**(1j*(delta/2))]])
 	R2=transpose(R1)
-	Ein=array([cos(pi/4)*e**(1j*(pi/2)),sin(pi/4)])*e**(1j*(phi))
+	Ein=array([cos(pi/4)*e**(-1j*(pi/2)),sin(pi/4)])*e**(1j*(phi))
 	return R2.dot(M.dot(R1.dot(Ein)))
 
 
@@ -53,17 +53,19 @@ def datagen(dearr,thearr,phiarr):
 	#rey=[cos(2*pi*500*0.000000079*i+0.3) for i in arange(50,3500)]
 
 
+	#writefile(rex,imx,rey,imy)
 
-	outlist=list(zip(t,rex,imx,rey,imy))
-	f=open("eout.csv",'w')
-	w=csv.writer(f, delimiter='\t')
-	w.writerows(outlist)
-	f.close()
 
 	#the order of the output is the same of the
 	#experimental setup real-imag-imag-real
 	return array(rex), array(imx), array(rey), array(imy)
 
+def writefile (a,b,c):
+	outlist=list(zip(a,b,c))
+	f=open("sim_pars.csv",'w')
+	w=csv.writer(f, delimiter='\t')
+	w.writerows(outlist)
+	f.close()
 ### random walk generator ###########
 
 import numpy.random as npr

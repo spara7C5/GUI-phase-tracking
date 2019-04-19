@@ -4,8 +4,10 @@
 from pylab import *
 import sympy as sm # many conflicts with pylab, numpy,math,...
 from scipy import signal, random
+import numpy as np
 import csv
 import time
+import datagenerator
 #import PSD
 
 
@@ -23,6 +25,7 @@ def lowfilter(data,fc,fs=2.5*10**6):
 	out2=signal.filtfilt(b, a, data[1])
 	out3=signal.filtfilt(b, a, data[2])
 	out4=signal.filtfilt(b, a, data[3])
+	#datagenerator.writefile(out1,out2,out3,out4)
 	return out1,out2,out3,out4
 
 
@@ -33,6 +36,7 @@ def whitenoise(data,wpow=10**(-11),fs=2.5*10**6):
 	out2=data[1]+sig_noise*random.normal(0,1,l)
 	out3=data[2]+sig_noise*random.normal(0,1,l)
 	out4=data[3]+sig_noise*random.normal(0,1,l)
+	datagenerator.writefile(out1,out2,out3,out4)
 	return out1,out2,out3,out4
 
 def downconvert(x,flo):
@@ -66,11 +70,11 @@ def tracker(data,din=1,tin=1,pin=1):
 
 	rex,imx,rey,imy=[],[],[],[]
 
+	rex=data[1]
+	imx=data[2]
+	rey=data[3]
+	imy=data[4]
 	
-	rex=data[3]
-	imx=data[4]
-	rey=data[1]
-	imy=data[2]
 	
 	#for the old data collection use this set:
 	'''
@@ -184,9 +188,11 @@ def tracker(data,din=1,tin=1,pin=1):
 		#sigt=sig_noise*uu[1,1]
 		#sigp=sig_noise*uu[2,2]
 		deB=uu.dot(Wn).dot(deY)
-		#deB[0]-=trunc(deB[0]/(pi))*(pi)
-		#deB[1]-=trunc(deB[1]/(pi))*(pi)
-		#deB[2]-=trunc(deB[2]/(pi))*(pi)
+		deB[0]-=np.round(deB[0]/(pi))*(pi)
+		deB[1]-=np.round(deB[1]/(4*pi))*(4*pi)
+		deB[2]-=np.round(deB[2]/(2*pi))*(2*pi)
+
+        
 		B=B+deB
 
 
@@ -208,6 +214,12 @@ def tracker(data,din=1,tin=1,pin=1):
 
 	print("loop finished")
 	print("elapsed time: ",time.time()-t1)
+    
+	outlist=list(zip(dell,thel,phil))
+	f=open("rec_pars.csv",'w')
+	w=csv.writer(f, delimiter='\t')
+	w.writerows(outlist)
+	f.close()
 	###########################################
 
 
@@ -223,6 +235,7 @@ def normalize(x1,x2,x3,x4):
 
 	for i in range(l):
 		#mod=sqrt(x1[i]**2 + x2[i]**2 + x3[i]**2 + x4[i]**2)
+        
 		rms1=sqrt(sum(x1**2))
 		rms2=sqrt(sum(x2**2))
 		rms3=sqrt(sum(x3**2))

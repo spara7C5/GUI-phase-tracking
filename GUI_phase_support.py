@@ -197,6 +197,7 @@ def LoadSim_pressed(p1):
     #parse_x(st_de.get(), samples)
     f_ph = parse_function(eq_ph.get())
 
+
     times_read=st_de.get()
     times_r_fl=float(times_read)
     timel=[times_r_fl*i for i in range(samples)]
@@ -228,6 +229,9 @@ def LoadSim_pressed(p1):
     loadata=array(loaddata)
     data_dir_load=1
     issim=1
+	
+    #write sim pars to file
+    datagenerator.writefile(fun_list[0],fun_list[1],fun_list[2])
 
     write_last(func_read=func_read,times_read=times_read,samples=samples,rands=pow_list)
 
