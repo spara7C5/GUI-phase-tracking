@@ -1,6 +1,7 @@
 
 
-### SIMULATOR OF THE OPTICAL FIBER ######
+########### Library for simulated data generation ###########
+### used in the "Load from sim" section of the LOAD TAB #####
 
 
 from numpy import *
@@ -55,7 +56,6 @@ def datagen(dearr,thearr,phiarr):
 
 	#writefile(rex,imx,rey,imy)
 
-
 	#the order of the output is the same of the
 	#experimental setup real-imag-imag-real
 	return array(rex), array(imx), array(rey), array(imy)
@@ -66,6 +66,8 @@ def writefile (a,b,c):
 	w=csv.writer(f, delimiter='\t')
 	w.writerows(outlist)
 	f.close()
+
+
 ### random walk generator ###########
 
 import numpy.random as npr

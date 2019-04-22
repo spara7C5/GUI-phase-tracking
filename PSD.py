@@ -1,11 +1,11 @@
 ####################################################
-######  PSD: direct method via Fourier Transform  ##
+##############  PSD calculation  ###################
 ####################################################
 
 from pylab import *
 from scipy import signal
 
-########-----entries-------######
+
 
 def plotpsd(Sin,fs):
 
@@ -19,7 +19,7 @@ def plotpsd(Sin,fs):
 	if mirroring:
 		S=pad(S,(0,len(S)),'symmetric')
 
-
+	S=signal.detrend(S,type='linear')
 	Ys = fft(S,int(N)) #length is half of data-length
 	Ysmod=2*((abs(Ys)**2)/(Fs*N**1))
 	fvec=(arange(len(S)))*(Fs/len(S))

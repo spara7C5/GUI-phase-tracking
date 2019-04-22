@@ -1,4 +1,6 @@
-################ PARSER ################
+######################### PARSER ###################################
+##### set of function to parse the textbox which accept equation ###
+####################################################################
 
 import numexpr as ne
 import numpy as np

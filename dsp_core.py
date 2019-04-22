@@ -36,7 +36,7 @@ def whitenoise(data,wpow=10**(-11),fs=2.5*10**6):
 	out2=data[1]+sig_noise*random.normal(0,1,l)
 	out3=data[2]+sig_noise*random.normal(0,1,l)
 	out4=data[3]+sig_noise*random.normal(0,1,l)
-	datagenerator.writefile(out1,out2,out3,out4)
+	#datagenerator.writefile(out1,out2,out3,out4)
 	return out1,out2,out3,out4
 
 def downconvert(x,flo):
@@ -228,10 +228,11 @@ def tracker(data,din=1,tin=1,pin=1):
 ########################################################################
 
 
+#function used for the single-photodiode phase extraction
 def normalize(x1,x2,x3,x4):
-# new variables are created in order to leave the input data unchanged
+
 	l=len(x1)
-	o1=o2=o3=o4=empty(l,dtype=float)
+	o1=o2=o3=o4=empty(l,dtype=float)# new variables are created in order to leave the input data unchanged
 
 	for i in range(l):
 		#mod=sqrt(x1[i]**2 + x2[i]**2 + x3[i]**2 + x4[i]**2)
