@@ -67,7 +67,7 @@ python3 GUI_phase.py
 #### Windows-like
 
 The software fully runs out of the box on Win10 in a IDE such as Anaconda/Spyder.<br />
-Follow the above linux-like section for running in CMD console.<br />
+(otherwise for running in CMD console, follow the above linux-like section) .<br />
 A dedicated installer for a standalone running is on the way....
 
 ## Running 
@@ -96,9 +96,9 @@ Extract the zip and play `GUI_phase.py` with the IDE
 This tab is in charge of load the four lists of sampled values of the DPOH channels. It can be done by two way:<br />
 The `Load from file` section manages a file (txt,csv,...) of collected experimental data. It must be formatted in five columns respectively
  |relative time|chx-real|chx-imag|chy-real|chx-imag| with a certain Delimiter which must be specified in the corresponding text box.
-Other DSP pre-processing features are available: chunking, downsampling, mixing for demodulation.
+Other DSP pre-processing features are available: chunking, downsampling, mixing for demodulation.<br />
 The `Load from simulated data` offers the possibility to simulate the transmission system, namely the behavior of the optical fiber with the
-DE e TE parameters and the optical (demodulated) phase PH.
+DE e TE parameters and the optical (demodulated) phase PH.<br />
 **NOTE!** the equations in the textbox must be written following the python/matlab syntax and the independent variable must be called `x` and 
 it must be always present (e.g. a simple constant K is written as 0*x+K )
 
@@ -107,7 +107,7 @@ it must be always present (e.g. a simple constant K is written as 0*x+K )
 This section visualizes the four electric channels. Additional whitenoise can be added for simulation purposes as well as a low pass filter.
 In case you want to go back, simply uncheck from the unwanted checkbox and press again the REFRESH button
 
-### CHANNELS TAB
+### CHANNELS PSD TAB
 
 This tab computes the phase noise PSD of each channel using a single-photodiode phase detection method.
 It should be used for short data collection where the channels have constant module or for a quick estimation of the harmonics affecting 
